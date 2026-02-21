@@ -39,9 +39,11 @@ channels = {
     "marine": 1418717338395480136,
 }
 
-checkTime = 60
-bufferMiles = 3
-VERSION = "v2.1.1"
+cycleTime = 60 # How much time, in seconds, should the cycle last?
+# Cycle is split by two periods, each period occurring after half of the "cycleTime" has elapsed.
+bufferMiles = 3 # How many miles does an alert need to be within UCF for it to issue to ARC alerts?
+storageTime = 18 # Time, in hours, to store alerts after they are issued.
+VERSION = "v2.2.0"
 AUTHOR = "ARC ALERTS @ UCF"
 identifierFormat = "AAA-0000" # Maintain a dash. Extend letters or numbers how you wish. Do not use multiple dashes.
 # Changing this after initial use will reset the count.
@@ -49,8 +51,6 @@ identifierFormat = "AAA-0000" # Maintain a dash. Extend letters or numbers how y
 alertCodes = {
     "TOR",
     "SVR",
-    "SVA",
-    "TOA",
     "FFW",
     "HUW",
     "TRW",
@@ -72,6 +72,7 @@ alertCodes = {
     "SPW",
     "ADR",
     "TSW",
+    "HWW",
 }
 
 polygon_colors_SAME = {
@@ -124,4 +125,14 @@ polygon_colors_SAME = {
     "RHW": "#3C7A5C",
     "SPW": "#A6245E",
     "VOW": "#FF0084",
+    "FWW": "#C40065",
+    "FWA": "#E7FFB2",
+    "CWY": "#5FBAFF",
+    "FZW": "#00D0FF",
+    "FZA": "#007E83",
+    "ECW": "#00064E",
+    "ECA": "#5972FF",
+    "RPS": "#674040",
+    "FRY": "#CFCFCF",
+    "WIY": "#FFFEC6",
 } # SMW/MAW for Special Marine Warning

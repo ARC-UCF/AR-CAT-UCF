@@ -1,10 +1,9 @@
-from services import State, Forecasts, Hurricane, AlertStatistics, alerts
+from services import State, Forecasts, Hurricane, AlertStatistics, alerts, OtlkHandler
 from services.syslogger import log
-from utils import Time, identifier, determiner, generate_alert_image, ucf_in_or_near_polygon, channels
+from utils import Time, identifier, determiner, generate_alert_image, ucf_in_or_near_polygon, channels, generate_outlook_image
 import config
 import asyncio
 import discord
-from discord import Webhook, SyncWebhook
 import os
 from io import BytesIO
 import datetime
@@ -34,7 +33,7 @@ severity_colors = { # This severity index is based on the severity property in a
 
 '''
 This is the sort of central system basically. This thing manages the services.
-I optimized waht I could/wanted to in the moment, further optimization can be expected, well, later.
+I optimized what I could/wanted to in the moment, further optimization can be expected, well, later.
 '''
 
 class Controller():
@@ -60,8 +59,13 @@ class Controller():
             if newDay:
                 fcast.reset_states()
                 hurr.reset_states()
+                OtlkHandler.reset_states()
             
             self.save_info()
+            
+            await asyncio.sleep(self.timeDelay)
+            
+            await self.handle_and_post_outlooks()
             
             await asyncio.sleep(self.timeDelay)
             
@@ -103,9 +107,11 @@ class Controller():
         return False
         
             
-    def establish(self):
-        data = st.send_to_disseminate()
-    
+    def establish(self): # This function fetches our json file to load all stored timings and alerts.
+        data = st.send_to_disseminate() # Fetches our saved data we load at runtime.
+        
+        # From here we go through each piece of stored information and correspondingly write it to each module for use during each cycle.
+        
         if data.get("alerts"):
             self.posted_alerts = data["alerts"].copy()
             aManager.write_to_alerts(data["alerts"].copy())         
@@ -125,11 +131,11 @@ class Controller():
         if data.get("stats"):
            alertStats.write_to_stats(data["stats"])
         
-        self.timeDelay = config.checkTime
+        self.timeDelay = config.cycleTime
     
-        if self.timeDelay < 20: self.timeDelay = 20
+        if self.timeDelay < 30: self.timeDelay = 30 # This is hard-coded to prevent excessive requests to the api.weather.gov endpoint. 
     
-        self.timeDelay = self.timeDelay/2
+        self.timeDelay = self.timeDelay/3
         
     def save_info(self):
         hInfo = hurr.return_forecast_states()
@@ -139,6 +145,29 @@ class Controller():
         tID = identifier.provide_next_id()
         
         st.write_data(fInfo, hInfo, self.posted_alerts, tim, tID, sInfo)
+        
+    async def handle_and_post_outlooks(self):
+        to_post = OtlkHandler.check_outlook()
+        
+        if to_post:
+            print("Preparing to post outlook information")
+            for day, info in to_post.items():
+                buf = generate_outlook_image(info["geom"])
+                
+                embed = discord.Embed(
+                    title=f"{day.capitalize()} Outlook Information",
+                    description=f"The Highest Risk for the area is {info["highest_risk"]}\n\nThe following areas are at risk of severe weather:\n{info["msg"]}",
+                    color=0x6382e0,
+                )
+                embed.set_footer(text=config.VERSION)
+                
+                embed.set_image(url="attachment://alert_map.png")
+                
+                await self.post_to_channel(channels.get_channel_from_county("forecast"), embed=embed, buf=buf)
+        else:
+            log.info("No outlook information for any selected period is avaiable to post at this time.")
+                
+                
         
     async def handle_and_post_forecasts(self):
         post, info = fcast.time_to_post_forecast()
@@ -199,15 +228,16 @@ class Controller():
         if alertList is None: return
         
         for a in alertList:
-            log.info("Comparing alerts.")
             alrt = alertList[a]
             Id = alrt["id"]
-            
-            log.info(f"Checking {Id}.")
+            ignore = alrt.get("ignore", False)
             
             if Id not in self.posted_alerts:
                 
-                log.info(f"{Id} not in posted alerts, working to add.")
+                if ignore:
+                    log.info(f"{Id} marked as ignored.")
+                    self.posted_alerts[Id] = alrt
+                    continue
                 
                 log.info(f"Working {Id}")
                 
@@ -295,12 +325,14 @@ class Controller():
                 )
                 
                 if alrt["instruction"]:
-                    embed.add_field(name="Precautionary/Preparedness Instructions", value=alrt["instruction"], inline=False)
+                    instruction_text = re.sub(r'(?<!\n)\n(?!\n)', ' ', alrt["instruction"])
+                    
+                    embed.add_field(name="Precautionary/Preparedness Instructions", value=instruction_text, inline=False)
                     
                 embed.add_field(name="Alert Information", value=infoMessage, inline=False)
                 embed.set_footer(text=config.VERSION)
                 
-                buf = generate_alert_image(alrt["coords"], alrt["base"], alrt["SAME_code"], alrt["polyColor"], alrt["trackId"])
+                buf = generate_alert_image(alrt["coords"], alrt["base"], alrt["SAME_code"], alrt["polyColor"], alrt["trackId"], alrt["countiesAffected"])
                 
                 embed.set_image(url="attachment://alert_map.png")
                 
@@ -347,9 +379,6 @@ class Controller():
                     log.info("Sent " + Id)
                 
                 await asyncio.sleep(5)
-            else:
-                log.info(f"{Id} is in active alerts.")
-                log.info(f"Confirming {Id} is in active alerts, {self.posted_alerts[Id]["id"]}")
                         
                 
                 
