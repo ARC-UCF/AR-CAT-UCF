@@ -12,6 +12,18 @@ import math
 import matplotlib.pyplot as plt
 from io import BytesIO
 
+CODES_WITH_IMAGES = ["TOR", "SVR", "SPS"]
+RADAR_EXTENTS = {
+    "KMLB": (-82.5, -79.0, 26.0, 29.5),
+    "KJAX": (-84.5, -80.0, 29.0, 32.5),
+    "KTBW": (-84.5, -80.0, 26.0, 29.5),
+}
+COUNTIES_WFO = {
+    "KMLB": ["brevard", "orange", "seminole", "volusia", "osceola", "lake"],
+    "KJAX": ["st. johns", "flagler"],
+    "KBTW": ["polk"],
+}
+
 ucf = Point(-81.2001, 28.6024) # UCF coords for shapely polygon checking
 ucf_point = gpd.GeoSeries([Point(ucf)], crs="EPSG:4326") # Converting UCF to GeoSeries now so we aren't doing this over and over again for just one point.
 ucf_point_m = ucf_point.to_crs(epsg=6439) # Convert to local CRS, this one being Florida East in meters.
@@ -94,7 +106,95 @@ def get_bounds_from_multipoylgon(multipoly, buffer_miles=0):
 def safe_geometries(reader):
     return [g for g in reader.geometries() if g is not None]
 
-def generate_alert_image(coords: list, base: str, alertCode: str, polyColor: str, trackId: str):
+def generate_outlook_image(risks):
+    log.info("Generating outlook image")
+    fig, ax = plt.subplots(figsize=(14, 10), subplot_kw={'projection': ccrs.PlateCarree()})
+    
+    ax.set_extent(
+        [-85.0, -79.0, 24.0, 31.0],  # [west, east, south, north]
+        crs=ccrs.PlateCarree()
+    )
+    
+    ax.add_feature(cfeature.LAND.with_scale('10m'), facecolor='lightgray', zorder=1)
+    ax.add_feature(cfeature.OCEAN.with_scale('10m'), facecolor='lightblue', zorder=1)
+    ax.add_feature(cfeature.LAKES.with_scale('10m'), facecolor='lightblue', zorder=2)
+    ax.add_feature(cfeature.RIVERS.with_scale('10m'), edgecolor='lightblue', zorder=2)
+    ax.add_feature(cfeature.BORDERS.with_scale('10m'), edgecolor='black', zorder=3)
+    ax.add_feature(cfeature.STATES.with_scale('10m'), edgecolor='black', zorder=3)
+    
+    counties_shp = natural_earth(resolution='10m', category='cultural', name='admin_2_counties')
+    counties_feature = ShapelyFeature(
+        geometries=safe_geometries(Reader(counties_shp)),
+        crs=ccrs.PlateCarree(),
+        facecolor='none',
+        edgecolor='red',
+        linewidth=1,
+        zorder=5,
+    )
+    if counties_feature is not None:
+        ax.add_feature(counties_feature)
+
+    roads_feature = ShapelyFeature(
+        geometries=safe_geometries(Reader(roads_shp)),
+        crs=ccrs.PlateCarree(),
+        edgecolor='darkslategray',  # whatever color you like
+        facecolor='none',
+        zorder=4,
+    )
+    if roads_feature is not None:
+        ax.add_feature(roads_feature)
+        
+    lakes_base_feature = ShapelyFeature(
+        geometries=safe_geometries(Reader(lakes_base_shp)),
+        crs=ccrs.PlateCarree(),
+        edgecolor='lightblue',  # whatever color you like
+        facecolor='lightblue',
+        zorder=3,
+    )
+    if lakes_base_feature is not None:
+        ax.add_feature(lakes_base_feature)
+        
+    rivers_base_feature = ShapelyFeature(
+        geometries=safe_geometries(Reader(lakes_base_shp)),
+        crs=ccrs.PlateCarree(),
+        edgecolor='lightblue',  # whatever color you like
+        facecolor='lightblue',
+        zorder=3,
+    )
+    if rivers_base_feature is not None:
+        ax.add_feature(rivers_base_feature)
+        
+    for risk in risks:
+        if risk["geometry"] is None:
+            continue
+        
+        log.info(f"Adding geometry for {risk['properties']['LABEL']} risk")
+        
+        geom = MultiPolygon(risk["geometry"]["coordinates"])
+        
+        ax.add_geometries(
+            geom,
+            crs=ccrs.PlateCarree(),
+            facecolor=risk["properties"]["fill"],
+            edgecolor=risk["properties"]["stroke"],
+            linewidth=2,
+            alpha=0.5,
+            zorder=6,
+        )
+        
+    buf = BytesIO()
+    plt.tight_layout()
+    plt.title(
+        label=f"Severe Weather Outlook for Central and Northeastern Florida", 
+        loc='left',
+        fontsize=24,
+    )
+    plt.savefig(buf, format='png', dpi=200, bbox_inches='tight')
+    buf.seek(0)
+    plt.close(fig)
+    return buf
+
+def generate_alert_image(coords: list, base: str, alertCode: str, polyColor: str, trackId: str, countiesAffected: list):
     '''
     All CSS colors are valid for facecolors and edgecolors.
     
@@ -152,7 +252,7 @@ def generate_alert_image(coords: list, base: str, alertCode: str, polyColor: str
     roads_feature = ShapelyFeature(
         geometries=safe_geometries(Reader(roads_shp)),
         crs=ccrs.PlateCarree(),
-        edgecolor='darkslategray',  # whatever color you like
+        edgecolor='darkslategray', 
         facecolor='none',
         zorder=4,
     )
@@ -162,7 +262,7 @@ def generate_alert_image(coords: list, base: str, alertCode: str, polyColor: str
     lakes_base_feature = ShapelyFeature(
         geometries=safe_geometries(Reader(lakes_base_shp)),
         crs=ccrs.PlateCarree(),
-        edgecolor='lightblue',  # whatever color you like
+        edgecolor='lightblue',  
         facecolor='lightblue',
         zorder=3,
     )
@@ -172,7 +272,7 @@ def generate_alert_image(coords: list, base: str, alertCode: str, polyColor: str
     rivers_base_feature = ShapelyFeature(
         geometries=safe_geometries(Reader(lakes_base_shp)),
         crs=ccrs.PlateCarree(),
-        edgecolor='lightblue',  # whatever color you like
+        edgecolor='lightblue',  
         facecolor='lightblue',
         zorder=3,
     )
@@ -188,9 +288,12 @@ def generate_alert_image(coords: list, base: str, alertCode: str, polyColor: str
         alpha=0.2,
         zorder=6,
     )
+    
+    if alertCode in CODES_WITH_IMAGES: 
+        print("Getting radar image")
         
-    lon_pad = 0.5  # wider east-west
-    lat_pad = 0.25  # shorter north-south
+    lon_pad = 1  # wider east-west
+    lat_pad = .25  # shorter north-south
     ax.set_extent([minx - lon_pad, maxx + lon_pad, miny - lat_pad, maxy + lat_pad], crs=ccrs.PlateCarree())
     
     bounds = get_bounds_from_multipoylgon(multipoly, 10)
