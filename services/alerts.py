@@ -1,12 +1,22 @@
 from utils import zoneManager, identifier
 from services.syslogger import log
+import difflib
 import requests
 import os
 from dotenv import load_dotenv
 import datetime
 from datetime import datetime, timezone, timedelta, time
-from config import polygon_colors_SAME
+from config import polygon_colors_SAME, storageTime
 load_dotenv('../sensitive.env')
+
+IGNORE_LIST = [
+    "SVR",
+    "TOR",
+    "FFW",
+    "FFS",
+    "SVS",
+    "SPS",
+]
 
 zones = zoneManager
 
@@ -17,6 +27,9 @@ class Alerts():
         self.initialized = True
         self.ActiveAlerts = {}
         log.info("Alerts SERIVCE initialized.")
+        
+    def normalize(self, text: str) -> str:
+        return text.lower().strip()
         
     def cycle(self) -> dict: # Public function called for the function to cycle.
         log.info("Cycling")
@@ -51,7 +64,16 @@ class Alerts():
                         alert["trackId"] = self.ActiveAlerts[ref]["trackId"]
                         alert["polyColor"] = self.ActiveAlerts[ref]["polyColor"]
                         alert["Referenced"] = True
-                    else:
+                        
+                    similar, ref = self._check_for_similar(alert)
+                    
+                    if similar and ref in self.ActiveAlerts:
+                        log.info("Alert is similar to an existing alert.")
+                        alert["trackId"] = self.ActiveAlerts[ref]["trackId"]
+                        alert["polyColor"] = self.ActiveAlerts[ref]["polyColor"]
+                        alert["ignore"] = True
+                        
+                    if not similar and not replacement:
                         alert["trackId"] = identifier.issue_identifier()
                         log.info(f"Track Identifier added, {alert["trackId"]}")
                         
@@ -123,16 +145,13 @@ class Alerts():
         log.info("Referenced alerts are not recorded.")
         
         return False, None, None
-                        
-        
-        
         
     def _clean_up(self): # Clean up our alerts; remove expired alerts or alerts which are expireless.
         log.info("Cleaning")
         now = datetime.now(timezone.utc)
         for aid, data in list(self.ActiveAlerts.items()):
             expires = data.get("expires")
-            if not expires or datetime.fromisoformat(expires) + timedelta(hours=24) < now:
+            if not expires or datetime.fromisoformat(expires) + timedelta(hours=storageTime) < now:
                 del self.ActiveAlerts[aid]
         
     def _retrieve_alerts_and_organize(self) -> list:
@@ -229,11 +248,9 @@ class Alerts():
                     "references": props.get("references", ""),
                     "replacedBy": props.get("replacedBy", ""),
                     "replacedAt": props.get("replacedAt", ""),
+                    "ignore": False,
                     **param_values,
                 })
-                log.info(f"{feature["id"]}, {SAME_LIST[0]} added to compiled alerts.")
-                if feature["id"] in self.ActiveAlerts:
-                    log.info(f"⚠️⚠️⚠️ THIS ALERT, {feature["id"]}, {props.get("event", "unspecified")}, IN ACTIVE ALERTS.")
         
         return compiled_alerts # Return list of compiled alerts.
     
@@ -272,20 +289,45 @@ class Alerts():
                             self.ActiveAlerts[alert]["references"] = references
                             wasUpdated = True
             else:
-                log.warn(f"{alert} failed to update.")
                 failed += 1
                 didFail = True
             
             if wasUpdated:
                 updated += 1
-                log.info(f"{alert} was updated.")
-            else:
-                log.info(f"{alert} was not updated.")
             
             if not didFail:
                 completed += 1
         
         log.info(f"Completed internal checks. {totalChecked} alerts checked, {failed} alerts failed to be checked, {completed} were successfully checked, and {updated} alerts were updated.")
+        
+    def _check_for_similar(self, alert: dict) -> tuple[bool, str]:
+        
+        if alert["SAME_code"] in IGNORE_LIST:
+            log.info(f"Skipping similarity check for {alert["id"]} because the SAME code is for an alert which might be similar in text but unique in location and other factors.")
+            return False, None
+        
+        log.info("Checking for similar alerts.")
+        norm_title = self.normalize(alert["title"])
+        norm_description = self.normalize(alert["desc"])
+        
+        for key, info in self.ActiveAlerts.items():
+            if key == alert["id"]:
+                continue
+            
+            ref_title = self.normalize(info["title"])
+            ref_description = self.normalize(info["desc"])
+            
+            title_ratio = difflib.SequenceMatcher(None, norm_title, ref_title).ratio() * 100
+            desc_ratio = difflib.SequenceMatcher(None, norm_description, ref_description).ratio() * 100
+            
+            log.info(f"{alert["id"]} vs {key}: Title similarity {title_ratio:.2f}%, Description similarity {desc_ratio:.2f}%")
+            
+            if title_ratio >= 85.0 and desc_ratio >= 85.0:
+                log.info(f"Similar alert found: {key} and {alert["id"]} with title similarity {title_ratio:.2f}% and description similarity {desc_ratio:.2f}%")
+                return True, key
+            
+        log.info("No similar alerts were found.")
+        return False, None
         
     def _poll_active_alerts(self) -> dict:
         url = "https://api.weather.gov/alerts/active?area=FL"
