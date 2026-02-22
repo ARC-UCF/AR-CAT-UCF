@@ -2,6 +2,7 @@ import requests
 from datetime import datetime, time
 from utils import zoneManager
 from shapely.geometry import Polygon, shape, MultiPolygon
+from services.syslogger import log
 
 outlooks = {
     "day_1": "https://www.spc.noaa.gov/products/outlook/day1otlk_cat.lyr.geojson",
@@ -195,7 +196,7 @@ class OutlookHandler():
         to_post = {}
         
         for day, data in self.posted_outlooks.items():
-            if isinstance(self.posted_outlooks[day], dict):
+            if not "ran" in data:
                 for time, info in self.posted_outlooks[day].items():
                     if info["Start"] <= datetime.now().time() <= info["End"] and not info["ran"]:
                         print("Checking outlook for " + day + " at time " + time)
@@ -226,14 +227,15 @@ class OutlookHandler():
                         
                     info["ran"] = True
                     
-            return to_post
+        return to_post
             
     def reset_states(self):
-        for day in self.posted_outlooks:
-            if isinstance(self.posted_outlooks[day], dict):
-                for time in self.posted_outlooks[day]:
-                    self.posted_outlooks[day][time]["ran"] = False
+        log.info("Resetting outlook states.")
+        for day in self.posted_outlooks.values():
+            if "ran" in day:
+                day["ran"] = False
             else:
-                self.posted_outlooks[day]["ran"] = False
+                for period in day.values():
+                    period["ran"] = False
                 
 OtlkHandler = OutlookHandler()
