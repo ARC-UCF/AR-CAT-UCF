@@ -10,6 +10,11 @@ Yes, I use a lot of print statements.
 Yes, they have a purpose.
 Delete them in your code if they want, they stay on the repo.
 '''
+
+IGNORE_ZONES = [
+    "https://api.weather.gov/zones/fire/FLZ163",
+    "https://api.weather.gov/zones/fire/FLZ167",
+]
     
 class Zones():
     
@@ -75,6 +80,10 @@ class Zones():
                 raise RuntimeError(f"NWS API error: {r}")
             
             for feature in r["features"]:
+                if feature["id"] in IGNORE_ZONES:
+                    log.info(f"Zone {feature["id"]} is in the ignore list, skipping the zone.")
+                    continue
+                
                 zoneId = feature["id"]
                 name = feature["properties"]["name"]
                 state = feature["properties"]["state"] 
