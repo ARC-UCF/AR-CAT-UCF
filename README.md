@@ -6,6 +6,15 @@ This system primarily utilizes [api.weather.gov](api.weather.gov), a web-based s
 
 Most of the functionality of this bot derives from this service, but also utilizes RSS, XML, and GIS shapefile feeds. For example, there's an XML feed provided for the hurricane information portion of this bot. 
 
+## REQUIRED
+
+To make sure the bot functions normally, install the required dependencies from `requirements.txt`, using `pip install -r requirements.txt`. 
+
+Secondly, ensure you properly configure the .env file in order to allow the bot to properly run. Inside of the .env file, you should include the following:
+* API TOKEN, written as "API-TOKEN", and contains the bot's API token.
+* The Guild Id, written as "GUILD_ID", and contains the server id from Discord.
+* And the header, written as "HEADER", and contains the following: (ARC ALERTS @ UCF (email@example.com)). This is **required** so that the NWS knows who is making the requests to their API and can contact you if needed. Otherwise, you may be blocked from accessing the endpoint. You can replace ARC ALERTS @ UCF to be whatever name you want it to be.
+
 ## Config
 
 Config contains the features for customizing most of the bot. Most of the features are based off of this, especially the alerting area. For this particular purpose, you're going to want to define the county name and state as `county, state`. As of now, the link is tied to specifically the florida area. The links which collect zone information utilize [https://api.weather.gov/zones?type=county&area=FL](https://api.weather.gov/zones?type=county&area=FL). For any changes, you want to specify the `area=FL` as the two digit code of your specified state. There are additional types provided in the `zones.py` code in the `utils` folder.
@@ -26,3 +35,8 @@ Configure the following as necessary:
 * `cycleTime`: the total amount of time the cycle should last. Each cycle is the total time it takes to run all parts. Each part is half of the cycle time.
 * `bufferMiles`: how many miles the edge of an alert polygon must be for it to trigger the ARC alerts
 * `storageTime`: the time, in hours, to store alerts after they are received.
+* `version`: used to reflect the latest version of the system. Change as you please, it really only reflects what version the bot posts on embeds. Do recommend keeping, however.
+* `author`: **deprecated**, was used for webhooks, which are no longer in use. **Looking to phase this out.**
+* `identifier_format`: **deprecated**, was used for the track id system, which is now numerical. **Looking to phase this out.**
+* `alertCodes`: contains the list of SAME/NWS codes the bot will ping for. For example, including TOR will ping for tornado warnings.
+* `polygon_colors_SAME`: contains the list of polygon colors for the bot to use for each SAME code.
