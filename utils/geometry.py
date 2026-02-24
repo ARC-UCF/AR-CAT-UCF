@@ -279,12 +279,15 @@ def generate_alert_image(coords: list, base: str, alertCode: str, polyColor: str
     if rivers_base_feature is not None:
         ax.add_feature(rivers_base_feature)
         
-    print(multipoly.is_valid)
-    print(multipoly.area)
-
-    for geom in multipoly.geoms:
-        xs, ys = geom.exterior.xy
-        ax.fill(xs, ys, transform=ccrs.PlateCarree(), facecolor=polyColor, edgecolor=polyColor, alpha=0.7, zorder=20)
+    ax.add_geometries(
+        multipoly, 
+        crs=ccrs.PlateCarree(), 
+        facecolor=polyColor, 
+        edgecolor=polyColor, 
+        linewidth=2, 
+        alpha=0.7, 
+        zorder=6, 
+    )
     
     if alertCode in CODES_WITH_IMAGES: 
         print("Getting radar image")
