@@ -1,0 +1,11 @@
+*.env
+*.cpg
+*.dbf
+*.html
+*.prj
+*.shp
+*.shx
+*.txt
+/natural_earth
+*.json
+*.pyc
