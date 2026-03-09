@@ -43,7 +43,7 @@ cycleTime = 75 # How much time, in seconds, should the cycle last?
 # Cycle is split by two periods, each period occurring after half of the "cycleTime" has elapsed.
 bufferMiles = 3 # How many miles does an alert need to be within UCF for it to issue to ARC alerts?
 storageTime = 18 # Time, in hours, to store alerts after they are issued.
-VERSION = "v2.3.0"
+VERSION = "v2.3.1"
 AUTHOR = "ARC ALERTS @ UCF"
 
 alertCodes = {
