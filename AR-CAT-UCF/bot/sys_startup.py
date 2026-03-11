@@ -15,5 +15,3 @@ def login():
                 log.error(f"Client is closed")
             else:
                 log.error(f"Error while logging in: {e}")
-                
-commence = login()
