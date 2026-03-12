@@ -44,4 +44,4 @@ class Config:
             buffer=buffer
         )
         
-config = Config()
+config = Config.load()
