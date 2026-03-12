@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 import os
-from dotenv import load_dotenv
 from configuration import settings
 
 @dataclass(frozen=True)
