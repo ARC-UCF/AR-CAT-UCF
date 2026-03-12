@@ -45,3 +45,4 @@ class Config:
             buffer=buffer
         )
         
+config = Config()
