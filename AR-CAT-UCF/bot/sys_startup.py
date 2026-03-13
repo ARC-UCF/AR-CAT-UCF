@@ -1,14 +1,11 @@
-import os
-from dotenv import load_dotenv
 from bot import client
 from logging.syslogger import log
-
-load_dotenv('./sensitive.env')
+from config import config
 
 def login():
     if not client.is_closed():
         try:
-            client.run(os.environ.get('API-TOKEN'))
+            client.run(config.token)
         except Exception as e:
             if client.is_closed():
                 log.error(f"Client is closed")
