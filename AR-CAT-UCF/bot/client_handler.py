@@ -11,4 +11,6 @@ async def on_ready():
     
     guild = discord.Object(id=config.guild_id)
     
-    
+@client.event
+async def on_disconnect():
+    log.warn(f"Client disconnected!")
