@@ -4,7 +4,7 @@ IGNORE_ZONES = [ # These zones, uh, are weird, and they make the bot break. So w
 ]
 
 from config import config
-from databases import fetch_zone_data, write_zone_data
+from databases import fetch_zone_data, write_zone_data 
 from helpers import fetch_url_with_header
 from logging.syslogger import log
 
@@ -13,11 +13,11 @@ COUNTIES = config.counties_to_watch
 class Zones():
     
     def __init__(self):
-        self.zone_map = {}
-        self.zone_to_county = {} 
-        self.state_appendix = {}
-        self.zone_geometry = {}
-        self.request_header = config.contact_header
+        self.zone_map = {} # This will be our zone map.
+        self.zone_to_county = {} # Zone to county conversions, which will tie into a function, which allows us to convert zone ids to their original names.
+        self.state_appendix = {} # Appendicies for states.
+        self.zone_geometry = {} # Compiled zone geometry. Loads geometry from zonedb first, if available.
+        self.request_header = config.contact_header # Configured contact header.
         log.info(f"Initializing zone information")
         
         self.load_current_zone_db()
