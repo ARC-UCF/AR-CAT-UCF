@@ -32,7 +32,7 @@ class Zones():
             if state_appendix not in self.StateAppendixs:
                 self.StateAppendixs[state_appendix] = state_appendix
             else: 
-                log.info("Appendix already included.")
+                log.info(f"Appendix already included.")
                 
     def load_current_zone_db(self):
         stored = fetch_zone_data()
