@@ -15,6 +15,7 @@ class Config:
     ping_roles: dict[str, str]
     ping_alerts: dict[str]
     buffer: int
+    storage_time: int
     
     @staticmethod
     def load() -> "Config":
@@ -29,6 +30,7 @@ class Config:
         ping_alerts = settings.alertCodes
         counties_to_watch = settings.countiesToMonitor
         buffer = settings.bufferMiles
+        storage_time = settings.storageTime
         
         return Config(
             token=token,
@@ -41,7 +43,8 @@ class Config:
             counties_to_watch=counties_to_watch,
             ping_roles=ping_roles,
             ping_alerts=ping_alerts,
-            buffer=buffer
+            buffer=buffer,
+            storage_time=storage_time
         )
         
 config = Config.load()
