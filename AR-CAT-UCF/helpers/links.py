@@ -15,7 +15,7 @@ def fetch_url_with_header(url, header):
             log.error(f"Response text: {r.text[:200]}")  # Log first 200 chars
             return []
     except requests.exceptions.RequestException as e:
-        log.error(f"⚠️ Request failed: {e}")
+        log.error(f"Request failed: {e}")
     return []
 
 def fetch_url(url):
