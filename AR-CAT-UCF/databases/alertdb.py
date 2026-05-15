@@ -3,7 +3,7 @@ from logging.syslogger import log
 
 FILE_LOCATION = "databases/alerts.json"
 
-def fetch_data():
+def fetch_alerts():
     try:
         with open(FILE_LOCATION) as f:
             data = json.load(f)

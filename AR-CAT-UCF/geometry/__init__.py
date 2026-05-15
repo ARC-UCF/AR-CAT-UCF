@@ -1,4 +1,4 @@
-from zones import zones
+from .zones import zones
 
 __all__ = [
     "zones",
