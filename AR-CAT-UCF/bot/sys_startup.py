@@ -1,4 +1,4 @@
-from bot import client
+from .bot import client
 from logging.syslogger import log
 from config import config
 

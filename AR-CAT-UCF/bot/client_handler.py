@@ -1,4 +1,4 @@
-from bot import client
+from .bot import client
 from config import config
 import discord
 from logging.syslogger import log
