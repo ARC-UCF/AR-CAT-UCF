@@ -6,7 +6,7 @@ class Controller():
         log.info(f"Controller initialized.")
         
 
-async def run():
+def run():
     login()
     
     
