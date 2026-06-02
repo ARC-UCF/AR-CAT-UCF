@@ -1,9 +1,10 @@
 import json
 from logging.syslogger import log
+from dataclasses import asdict
 
 FILE_LOCATION = "databases/alerts.json"
 
-def fetch_alerts():
+def fetch_alerts() -> dict:
     try:
         with open(FILE_LOCATION) as f:
             data = json.load(f)
@@ -15,9 +16,9 @@ def fetch_alerts():
         log.critical(f"Unable to load alertdb file: {e}")
         return {}
     
-def write_alerts(data):
+def write_alerts(alerts):
     try:
         with open(FILE_LOCATION, "w") as f:
-            json.dump(data, f, indent=2)
+            json.dump([asdict(alert) for alert in alerts], f, indent=4)
     except Exception as e:
         log.critical(f"Issue when writing a file: {e}")

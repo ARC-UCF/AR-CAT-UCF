@@ -22,6 +22,7 @@ class Alert():
     counties: list
     parameters: dict | list
     ignore: bool = False
+    posted: bool = False
     
     references: Optional[dict] = None
     replacedBy: Optional[str] = None
@@ -66,28 +67,32 @@ class Alert():
         )
         
     @property
-    def is_expired(self) -> bool:
-        if not self.expires:
+    def is_expired(cls) -> bool:
+        if not cls.expires:
             return False
         
-        return datetime.now(timezone.utc) >= datetime.fromisoformat(self.expires).astimezone(timezone.utc)
+        return datetime.now(timezone.utc) >= datetime.fromisoformat(cls.expires).astimezone(timezone.utc)
     
     @property
-    def ignore_this_alert(self):
-        self.ignore = True
+    def ignore_this_alert(cls):
+        cls.ignore = True
         
     @property
-    def _scrub_text(self, text: str) -> str:
+    def from_dict(cls, data):
+        return cls(**data)
+        
+    @property
+    def _scrub_text(cls, text: str) -> str:
         return re.sub(r'(?<!\n)\n(?!\n)', ' ', text)
         
     @property
-    def get_formatted_text(self) -> tuple[str, str]:
-        return self._scrub_text(self.desc), self._scrub_text(self.instruction)
+    def get_formatted_text(cls) -> tuple[str, str]:
+        return cls._scrub_text(cls.desc), cls._scrub_text(cls.instruction)
     
     @property
-    def update_alert(self, **kwargs):
+    def update_alert(cls, **kwargs):
         for key, value in kwargs.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
+            if hasattr(cls, key):
+                setattr(cls, key, value)
             else:
                 log.error(f"Unable to update value: {key} does not exist")

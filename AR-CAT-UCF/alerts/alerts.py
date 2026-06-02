@@ -5,6 +5,8 @@ from datetime import datetime, timezone, timedelta
 from geometry import zones
 from helpers import AsyncLinks
 from classes import Alert
+from databases import fetch_alerts, write_alerts
+import asyncio
 
 storageTime = config.storage_time
 polygonColors = config.alert_colors
@@ -28,8 +30,28 @@ class Alerts():
     async def cycle(self) -> dict:
         log.info("Running cycle")
         
+        await self._filter_alerts()
+        
+        asyncio.sleep()
+        
     def normalize(self, text: str) -> str:
         return text.lower().strip()
+    
+    def load_alerts(self):
+        alerts = fetch_alerts()
+        
+        for a in alerts:
+            alert = Alert.from_dict(a)
+            
+            self.ActiveAlerts[alert.id] = alert
+            
+    async def post_alerts(self):
+        for alert in self.ActiveAlerts:
+            if not alert.posted and not alert.ignore:
+                print("Stuff") # Will work on
+    
+    def save_alerts(self):
+        write_alerts(self.ActiveAlerts)
         
     def first_or_empty(self, lst) -> list: # Helper function for lists.
         return lst[0] if lst else ""
@@ -102,8 +124,6 @@ class Alerts():
         if not self.ActiveAlerts: log.warn(f"No alerts were active to filter through or update."); return
         
         refAlerts = await self._poll_old_alerts()
-        
-        alertList = self._compile_alerts_for_ref(refAlerts)
         
         if not refAlerts: log.warn(f"Unable to compile list of old alerts."); return
         
