@@ -8,7 +8,6 @@ class Config:
     guild_id: int
     contact_header: str
     channels: dict[str, int]
-    cycle_time: int
     version_id: str
     alert_colors: dict[str, str]
     counties_to_watch: dict[str]
@@ -22,7 +21,6 @@ class Config:
         token = os.getenv("API-TOKEN")
         guild_id = settings.guild_id
         contact_header = os.getenv('HEADER')
-        cycle_time = settings.cycleTime
         version_id = settings.version
         alert_colors = settings.polygon_colors_SAME
         channels = settings.channels
@@ -37,7 +35,6 @@ class Config:
             guild_id=guild_id,
             contact_header=contact_header,
             channels=channels,
-            cycle_time=cycle_time,
             version_id=version_id,
             alert_colors=alert_colors,
             counties_to_watch=counties_to_watch,

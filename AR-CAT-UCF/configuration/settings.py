@@ -1,5 +1,4 @@
 guild_id = 881444885402628177
-cycleTime = 75
 bufferMiles = 3
 storageTime = 18 # In hours
 version = "v3.0.0"

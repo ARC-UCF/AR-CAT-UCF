@@ -1,5 +1,6 @@
 import requests
 from logging.syslogger import log
+import aiohttp
 
 def fetch_url_with_header(url, header):
     try:
@@ -34,3 +35,17 @@ def fetch_url(url):
     except requests.exceptions.RequestException as e:
         log.error(f"Request failed: {e}")
     return []
+
+class ALinks():
+    def __init__(self):
+        self.session = aiohttp.ClientSession()
+        
+    async def fetch_url_with_header(self, url, header):
+        async with self.session.get(url, headers=header) as response:
+            return await response.json()
+        
+    async def fetch_url(self, url):
+        async with self.session.get(url) as response:
+            return await response.json()
+        
+AsyncLinks = ALinks()

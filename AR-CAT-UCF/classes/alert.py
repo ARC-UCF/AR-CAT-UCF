@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from dataclasses import dataclass
 from typing import Optional
+from logging.syslogger import log
 import re
 
 @dataclass(eq=True)
@@ -23,7 +24,7 @@ class Alert():
     ignore: bool = False
     
     references: Optional[dict] = None
-    replacedBy: Optional[dict] = None
+    replacedBy: Optional[str] = None
     replacedAt: Optional[str] = None
     secondary_title: Optional[str] = None
     areaDesc: Optional[str] = None
@@ -82,3 +83,11 @@ class Alert():
     @property
     def get_formatted_text(self) -> tuple[str, str]:
         return self._scrub_text(self.desc), self._scrub_text(self.instruction)
+    
+    @property
+    def update_alert(self, **kwargs):
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+            else:
+                log.error(f"Unable to update value: {key} does not exist")
