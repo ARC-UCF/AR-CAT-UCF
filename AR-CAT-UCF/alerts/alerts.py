@@ -3,7 +3,7 @@ from logging.syslogger import log
 import difflib
 from datetime import datetime, timezone, timedelta
 from geometry import zones
-from helpers import AsyncLinks
+from helpers import AsyncLinks, channels
 from classes import Alert
 from databases import fetch_alerts, write_alerts
 import asyncio
@@ -48,7 +48,9 @@ class Alerts():
     async def post_alerts(self):
         for alert in self.ActiveAlerts:
             if not alert.posted and not alert.ignore:
-                print("Stuff") # Will work on
+                log.info(f"Working alert {alert.id}")
+                
+                
     
     def save_alerts(self):
         write_alerts(self.ActiveAlerts)
