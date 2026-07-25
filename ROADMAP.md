@@ -25,6 +25,7 @@ This does not include any bug fixes, and focuses on the base changes, so from V3
 - [ ] Weather radar implementation on a select few alerts
 - [ ] Upgraded and/or checking of current alert tracking and handling for new, changed, cancelled, or expired alerts
 - [ ] Extra preparedness messages
+- [ ] Pinging the bot will have it send you the current weather conditions
 
 ### V3.2.0 
 
