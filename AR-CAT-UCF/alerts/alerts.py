@@ -156,9 +156,9 @@ class Alerts():
                 
                 buf = generate_alert_image(alert.geom, alert.geo_base, alert.same)
                 
-                fileName = "attachment://alert_map.png"
+                fileName = "alert_map.png"
                 
-                embed.set_image(url=fileName)
+                embed.set_image(url="attachment://alert_map.png")
                 
                 for county in alert.counties:
                     channel = channels.get_channel_from_name(county)
