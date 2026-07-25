@@ -1,6 +1,6 @@
 guild_id = 881444885402628177
 bufferMiles = 3
-storageTime = 18 # In hours
+storageTime = 24 # In hours
 version = "v3.0.0"
 author = "AR-CAT-UCF"
 

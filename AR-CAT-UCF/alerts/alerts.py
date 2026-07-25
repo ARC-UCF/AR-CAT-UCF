@@ -7,6 +7,7 @@ from helpers import AsyncLinks, channels
 from classes import Alert
 from databases import fetch_alerts, write_alerts
 import asyncio
+from determiner import determiner
 
 storageTime = config.storage_time
 polygonColors = config.alert_colors
@@ -26,6 +27,13 @@ class Alerts():
         self.initialized = True
         self.ActiveAlerts: dict[Alert] = {}
         log.info("Alerts have been initialized")
+        self.severity_colors = { # This severity index is based on the severity property in alerts.
+            "Extreme": 0xA020F0,   # Purple
+            "Severe": 0xFF0000,    # Red
+            "Moderate": 0xFFA500,  # Orange
+            "Minor": 0xFFFF00,     # Yellow
+            "Unknown": 0x808080    # Gray
+        }
         
     async def cycle(self) -> dict:
         log.info("Running cycle")
@@ -49,6 +57,91 @@ class Alerts():
         for alert in self.ActiveAlerts:
             if not alert.posted and not alert.ignore:
                 log.info(f"Working alert {alert.id}")
+                
+                # Begins the process of compiling the alert.
+                
+                severity = alert.severity or "unknown"
+                color = self.severity_colors.get(severity, 0x808080)
+                
+                header = f"{alert.title}"
+                
+                header = (header[:256-4] + "...") if len (header) > 256 else header
+                
+                preambleList = [
+                    "WMOidentifier",
+                    "AWIPSidentifier",
+                    "VTEC",
+                    "space",
+                    "event",
+                    "senderName",
+                    "bulletin",
+                ]
+                
+                preamble_lines = []
+                
+                for param in preambleList:
+                    if param == "space":
+                        preamble_lines.append("")
+                    elif param == "bulletin":
+                        bulletin = determiner.determine(alert.parameters.get("WEAHandling", ""), alert.messageType, alert.severity, alert.certainty, alert.urgency)
+                        if bulletin:
+                            preamble_lines.append(bulletin)
+                    elif param == "senderName":
+                        preamble_lines.append(alert.senderName)
+                    elif alert.parameters.get(param, ""):
+                        preamble_lines.append(alert.parameters.get(param, ""))
+                        
+                preambleString = "\n".join(preamble_lines)
+                
+                main_lines = []
+                
+                if alert.secondary_title: main_lines.append(alert.secondary_title)
+                if alert.desc: main_lines.append(alert._scrub_text(alert.desc))
+                
+                mainString = "\n\n".join(main_lines)
+                
+                trunc_text = (mainString[:3850-3] + "...") if len(mainString) > 3850 else mainString
+                
+                if alert.parameters.get("eventMotionDescription"): trunc_text = trunc_text + "\n\n" + alert.parameters.get("eventMotionDescription")
+                
+                info_lines = []
+                
+                information_to_fetch = {
+                    "hailThreat": "Hail Threat: ",
+                    "maxHailSize": "Max Hail Size: ",
+                    "windThreat": "Wind Threat: ",
+                    "maxWindGust": "Max Wind Gust: ",
+                    "tornadoDetection": "Tornado Detection: ",
+                    "tornadoDamageThreat": "Damage Threat: ",
+                    "thunderstormDamageThreat": "Damage Threat: ",
+                    "flashfloodDamageThreat": "Damage Threat: ",
+                }
+                
+                if alert.id: info_lines.append("Alert Id: " + alert.id)
+                if alert.same: 
+                    if alert.same == "NWS":
+                        alert.same = alert.nws
+                        
+                    info_lines.append("SAME: " + alert.same)
+                    
+                if alert.severity: info_lines.append("Severity: " + alert.severity)
+                if alert.urgency: info_lines.append("Urgency: " + alert.urgency)
+                if alert.certainty: info_lines.append("Certainty: " + alert.certainty)
+                if alert.response: info_lines.append("Response: " + alert.response)
+                
+                for key, lead in information_to_fetch.items():
+                    if alert.parameters.get(key):
+                        info_lines.append(lead + alert.parameters.get("key"))
+                
+                infoMessage = "\n".join(info_lines)
+                
+                
+            else:
+                if alert.posted:
+                    log.info(f"Alert {alert.id} has already been posted.")
+                
+                if alert.ignore:
+                    log.info(f"Alert {alert.id} was ignored.")
                 
                 
     
@@ -262,6 +355,7 @@ class Alerts():
             return None
         
     async def _poll_old_alerts(self) -> dict:
+        # This polls all alerts from the Florida area, which we can then filter.
         url = "https://api.weather.gov/alerts?area=FL"
         
         dict = await AsyncLinks.fetch_url_with_header(url=url, header=config.contact_header)

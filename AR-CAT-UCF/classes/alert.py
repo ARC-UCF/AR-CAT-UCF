@@ -48,7 +48,7 @@ class Alert():
             severity=props.get("severity"),
             urgency=props.get("urgency"),
             senderName=props.get("senderName"),
-            response=props.get("sender"),
+            response=props.get("response"),
             desc=props.get("description"),
             messageType=props.get("messageType"),
             geo_base=geom_base,
