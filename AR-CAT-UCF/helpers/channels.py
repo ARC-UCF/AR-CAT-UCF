@@ -9,6 +9,7 @@ class Channels():
         self.synced_channels = {}
         self.synced = False
         log.info(f"Initializing channels")
+        self.sync_channels()
         
     def sync_channels(self):
         for channel, cid in config.channels.items():

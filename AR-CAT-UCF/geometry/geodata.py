@@ -5,6 +5,7 @@ from pathlib import Path
 class GeoDataHandler():
     def __init__(self):
         log.info("Initializing geodata services.")
+        self._checkForGeoData()
         
     # Internal function to check for geometry data.
     def _checkForGeoData(self):
