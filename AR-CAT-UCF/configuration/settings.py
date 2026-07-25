@@ -73,63 +73,63 @@ alertCodes = {
 }
 
 polygon_colors_SAME = {
-    "TOR": '#d900ff',
-    "SVR": '#ffb300',
-    "FFW": '#00bf03',
-    "SPS": '#0086bf',
-    "FAY": '#00ff8c',
-    "FLW": '#00ff40',
-    "FLS": '#00ff40',
-    "BZW": "#81E0FF",
-    "CFA": "#2E8903",
-    "CFW": "#00A63D",
-    "DSW": "#907D4D",
-    "EWW": "#FEDD46",
-    "FFA": "#0A6200",
-    "FFS": "#71FC73",
-    "FLA": "#0E6B22",
-    "HWA": "#A87951",
-    "HWW": "#FFC041",
-    "HUA": "#4C8A9C",
-    "HUW": "#67D7FF",
-    "HLS": "#007099",
-    "SVA": "#FF8F5C",
-    "SQW": "#BFBFBF",
-    "SMW": "#9E9659",
-    "SSA": "#BCF2FF",
-    "SSW": "#6CEBFF",
-    "TOA": "#FDFD59",
-    "TRA": "#B25757",
-    "TRW": "#FF5151",
-    "TSA": "#565CA3",
-    "TSW": "#2200FF",
-    "WSA": "#C9EEFF",
-    "WSW": "#89DEFF",
-    "AVA": "#4BBAFF",
-    "AVW": "#2EBDFF",
-    "BLU": "#140168",
-    "CAE": "#690000",
-    "CDW": "#FF57D8",
-    "CEM": "#DD00FF",
-    "EQW": "#5E2B2B",
-    "EVI": "#544B4B",
-    "FRW": "#626CB7",
-    "HMW": "#95A129",
-    "LEW": "#7386FF",
-    "LAE": "#272A50",
-    "TOE": "#F67CFF",
-    "NUW": "#FAFFB6",
-    "RHW": "#3C7A5C",
-    "SPW": "#A6245E",
-    "VOW": "#FF0084",
-    "FWW": "#C40065",
-    "FWA": "#E7FFB2",
-    "CWY": "#5FBAFF",
-    "FZW": "#00D0FF",
-    "FZA": "#008B90",
-    "ECW": "#00064E",
-    "ECA": "#5972FF",
-    "RPS": "#674040",
-    "FRY": "#2B5872",
-    "WIY": "#FFFEC6",
+    "TOR": '#d900ff', # Tornado Warning
+    "SVR": '#ffb300', # Severe Thunderstorm Warning
+    "FFW": '#00bf03', # Flash Flood Warning
+    "SPS": '#0086bf', # Special Weather Statement
+    "FAY": '#00ff8c', # Flood Advisory
+    "FLW": '#00ff40', # Flood Warning
+    "FLS": '#00ff40', # Flood Statement
+    "BZW": "#81E0FF", # Blizzard Warning
+    "CFA": "#2E8903", # Coastal Flood Advisory
+    "CFW": "#00A63D", # Coastal Flood warning
+    "DSW": "#907D4D", # Dust Storm Warning
+    "EWW": "#FEDD46", # Extreme Wind Warning
+    "FFA": "#0A6200", # Flash Flood Watch
+    "FFS": "#71FC73", # Flash Flood Statement
+    "FLA": "#0E6B22", # Flood Watch
+    "HWA": "#A87951", # High Wind Watch
+    "HWW": "#FFC041", # High Wind Warning
+    "HUA": "#4C8A9C", # Hurricane Watch
+    "HUW": "#67D7FF", # Hurricane Warning
+    "HLS": "#007099", # Hurricane Statement
+    "SVA": "#FF8F5C", # Severe Thunderstorm Warning
+    "SQW": "#BFBFBF", # Snow Squall Warning
+    "SMW": "#9E9659", # Special Marine Warning
+    "SSA": "#BCF2FF", # Storm Surge Watch
+    "SSW": "#6CEBFF", # Storm Surge Warning
+    "TOA": "#FDFD59", # Tornado Watch
+    "TRA": "#B25757", # Tropical Storm Watch
+    "TRW": "#FF5151", # Tropical Storm Warning
+    "TSA": "#565CA3", # Tsunami Watch
+    "TSW": "#2200FF", # Tsunami Warning
+    "WSA": "#C9EEFF", # Winter Storm Watch
+    "WSW": "#89DEFF", # Winter Storm Warning
+    "AVA": "#4BBAFF", # Avalanche Watch
+    "AVW": "#2EBDFF", # Avalanche Warning
+    "BLU": "#140168", # Code Blue
+    "CAE": "#690000", # Child Abduction Emergency
+    "CDW": "#FF57D8", # Civil Danger Warning
+    "CEM": "#DD00FF", # Civil Emergency Message
+    "EQW": "#5E2B2B", # Earthquake Warning
+    "EVI": "#544B4B", # Evacuation Immediate
+    "FRW": "#626CB7", # Fire Warning
+    "HMW": "#95A129", # Hazardous Materials Warning
+    "LEW": "#7386FF", # Law Enforcement Warning
+    "LAE": "#272A50", # Local Area Emergency
+    "TOE": "#F67CFF", # 911 Telephone Outage Emergency
+    "NUW": "#FAFFB6", # Nuclear Power Plant Warning
+    "RHW": "#3C7A5C", # Radiological Hazard Warning
+    "SPW": "#A6245E", # Shelter in Place Warning
+    "VOW": "#FF0084", # Volcano Warning
+    "FWW": "#C40065", # Red Flag Warning
+    "FWA": "#E7FFB2", # Fire Weather Watch
+    "CWY": "#5FBAFF", # Cold Advisory
+    "FZW": "#00D0FF", # Freeze Warning
+    "FZA": "#008B90", # Freeze Watch
+    "ECW": "#00064E", # Extreme Cold Warning
+    "ECA": "#5972FF", # Extreme Cold Watch
+    "RPS": "#674040", # Rip Current Statement
+    "FRY": "#2B5872", # Beach Hazards Statement
+    "WIY": "#FFFEC6", # Wind Advisory
 } # SMW/MAW for Special Marine Warning
