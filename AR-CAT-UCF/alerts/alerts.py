@@ -3,11 +3,14 @@ from logging.syslogger import log
 import difflib
 from datetime import datetime, timezone, timedelta
 from geometry import zones
-from helpers import AsyncLinks, channels
+from helpers import AsyncLinks, channels, post_embed_with_image, post_message
 from classes import Alert
 from databases import fetch_alerts, write_alerts
 import asyncio
 from determiner import determiner
+from io import BytesIO
+import discord
+from geometry import generate_alert_image, ucf_in_or_near_polygon
 
 storageTime = config.storage_time
 polygonColors = config.alert_colors
@@ -104,6 +107,8 @@ class Alerts():
                 
                 if alert.parameters.get("eventMotionDescription"): trunc_text = trunc_text + "\n\n" + alert.parameters.get("eventMotionDescription")
                 
+                full_body = preambleString + "\n\n" + trunc_text
+                
                 info_lines = []
                 
                 information_to_fetch = {
@@ -135,7 +140,79 @@ class Alerts():
                 
                 infoMessage = "\n".join(info_lines)
                 
+                embed = discord.Embed(
+                    title=header,
+                    description=full_body,
+                    color=color
+                )
                 
+                if alert.instruction:
+                    instruction_text = alert._scrub_text(alert.instruction)
+                    
+                    embed.add_field(name="Precautionary/Preparedness Instructions", value=instruction_text, inline=False)
+                    
+                embed.add_field(name="Alert Information", value=infoMessage, inline=False)
+                embed.set_footer(config.version_id)
+                
+                buf = generate_alert_image(alert.geom, alert.geo_base, alert.same)
+                
+                fileName = "attachment://alert_map.png"
+                
+                embed.set_image(url=fileName)
+                
+                for county in alert.counties:
+                    channel = channels.get_channel_from_name(county)
+                    
+                    if channel:
+                        log.info(f"Channel found for {county}")
+                        
+                        if alert.same in config.ping_alerts and alert.status == "Actual":
+                            ping = config.ping_roles[county]
+                            successful = await post_message(channel=channel, content=ping)
+                            
+                            if successful:
+                                log.info(f"Ping sent")
+                            
+                        success = await post_embed_with_image(channel=channel, content=embed, buf=buf, fileName=fileName)
+                        if success:
+                            log.info(f"Embed sent with image.")
+                    if county == "orange" and alert.geo_base == "County":
+                        channel = channels.get_channel_from_name("arc")
+                        
+                        if alert.same in config.ping_alerts and alert.status == "Actual":
+                            ping = config.ping_roles["arc"]
+                            successful = await post_message(channel=channel, content=ping)
+                            
+                            if successful:
+                                log.info(f"Sent ping successfully")
+                        
+                        success = await post_embed_with_image(channel=channel, content=embed, buf=buf, fileName=fileName)
+                        
+                        if success:
+                            log.info(f"Sent embed successfully")
+                    if (county == "orange" or county == "seminole") and alert.geo_base == "Polygon":
+                        ucfAffected = ucf_in_or_near_polygon(alert.geom)
+                        
+                        if ucfAffected:
+                            channel = channels.get_channel_from_name("arc")
+                            
+                            if alert.same in config.ping_alerts and alert.status == "Actual":
+                                ping = config.ping_roles["arc"]
+                                successful = await post_message(channel=channel, content=ping)
+                                
+                                if successful:
+                                    log.info(f"Sent ping successfully")
+                                    
+                            success = await post_embed_with_image(channel=channel, content=embed, buf=buf, fileName=fileName)
+                            
+                            if success:
+                                log.info(f"Sent embed successfully")
+                
+                log.info(f"Finished sending alert {alert.id} for {alert.counties}")
+                log.info(f"Moving onto next alert")
+                
+                await asyncio.sleep(5)
+                        
             else:
                 if alert.posted:
                     log.info(f"Alert {alert.id} has already been posted.")

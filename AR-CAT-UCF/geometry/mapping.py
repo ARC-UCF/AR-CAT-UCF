@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 from config import config
 from logging.syslogger import log
+from geometry import zones
 
 # Miscelleanous variables for this system
 
@@ -165,7 +166,7 @@ def generate_outlook_image(risks):
     plt.close(fig)
     return buf
 
-def generate_alert_image(coords, alertCode):
+def generate_alert_image(coords, coordBase, alertCode):
     geodat_gpkg = base_dir / "geometry" / "geodata" / "florida.gpkg"
     
     coastline = gpd.read_file(geodat_gpkg, layer="coastline")
@@ -177,9 +178,22 @@ def generate_alert_image(coords, alertCode):
     counties=gpd.read_file(census_shp)
     counties=counties.to_crs(ccrs.PlateCarree())
     
-    polygon = shape(coords)
+    alert = None
     
-    alert = gpd.GeoDataFrame(geometry=[polygon], crs="ESPG:4326")
+    if coordBase == "Polygon":
+        polygon = shape(coords)
+        alert = gpd.GeoDataFrame(geometry=[polygon], crs="ESPG:4326")
+    elif coordBase == "County":
+        polygons = []
+        
+        for zone in coords:
+            geom = zones.get_zone_geo(zone)
+            
+            polygon = shape(geom)
+            
+            polygons.append(polygon)
+            
+        alert = gpd.GeoDataFrame(geometry=polygons, crs="ESPG:4326")
     
     polygonColor = config.alert_colors.get(alertCode, "None")
     
