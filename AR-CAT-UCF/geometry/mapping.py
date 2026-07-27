@@ -4,12 +4,12 @@ from pathlib import Path
 
 import cartopy.crs as ccrs
 from shapely.geometry import Point, shape
-import math
 import matplotlib.pyplot as plt
 from io import BytesIO
 from config import config
 from logging.syslogger import log
 from geometry import zones
+from classes import RiskArea
 
 # Miscelleanous variables for this system
 
@@ -62,7 +62,7 @@ def ucf_in_or_near_polygon(geodat) -> tuple[bool, str]:
     
     return False, ""
 
-def generate_outlook_image(risks):
+def generate_outlook_image(risks: dict[str, RiskArea]):
     geodat_gpkg = base_dir / "geometry" / "geodata" / "florida.gpkg"
         
     coastline = gpd.read_file(geodat_gpkg, layer="coastline")
@@ -123,7 +123,7 @@ def generate_outlook_image(risks):
         facecolor="#d22c2c",
         edgecolor=None,
         linewidth=1,
-        zorder=8
+        zorder=7
     )
         
     for _, place in places.iterrows():
@@ -135,23 +135,24 @@ def generate_outlook_image(risks):
             ha="center"
         )
         
-    for risk in risks:
-        if risk["geometry"] is None:
+    for label, risk in risks.items():
+        if risk.geometry is None:
+            log.critical(f"Forced to skip {label} due to no geometry data.")
             continue
         
-        log.info(f"Adding geometry for {risk["properties"]["LABEL"]} risk")
+        log.info(f"Adding geometry data for {label} risk")
         
-        risk_geom = shape(risk["geometry"])
+        risk_geom = shape(risk.geometry)
         
         risk_area = gpd.GeoDataFrame(geometry=[risk_geom], crs="ESPG:4326")
         
         risk_area.plot(
             ax=ax,
-            facecolor=risk["properties"]["fill"],
-            edgecolor=risk["properties"]["stroke"],
+            facecolor=risk.fill,
+            edgecolor=risk.stroke,
             linewidth=2,
             alpha=0.5,
-            zorder=1
+            zorder=risk.display_num
         )
         
     buf = BytesIO()

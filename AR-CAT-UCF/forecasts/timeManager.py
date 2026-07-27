@@ -1,4 +1,5 @@
 from datetime import datetime
+from logging.syslogger import log
 
 class TimeManager():
     def __init__(self):
@@ -8,8 +9,10 @@ class TimeManager():
         currentTime = str(datetime.now().date())
         
         if currentTime != self.lastRecordedTime:
+            log.info(f"It is a new day, timings will be reset.")
             self.lastRecordedTime = currentTime
             
             return True
         else:
+            log.info(f"Not yet a new day.")
             return False

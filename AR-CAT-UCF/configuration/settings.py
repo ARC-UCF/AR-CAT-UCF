@@ -132,4 +132,5 @@ polygon_colors_SAME = {
     "RPS": "#674040", # Rip Current Statement
     "FRY": "#2B5872", # Beach Hazards Statement
     "WIY": "#FFFEC6", # Wind Advisory
+    "HTY": "#DD8962", # Heat Advisory
 } # SMW/MAW for Special Marine Warning

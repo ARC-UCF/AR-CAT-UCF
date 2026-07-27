@@ -69,3 +69,4 @@ These features are planned but have no definite version by which they will be ad
 - [ ] CAT voice over repeater
 - [ ] CAT over MQTT
 - [ ] Multiple server support
+- [ ] Atlantic Hurricane Wallet XML Subscriptions (subscribing to XML NHC wallets to get relevant Hurricane Information)
