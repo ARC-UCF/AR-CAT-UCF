@@ -282,6 +282,14 @@ class SevereWeatherOtlk():
                 return True
             else:
                 return False
+            
+    def reset_states(self):
+        for day, data in self.posted_outlooks.items():
+            if "run" not in data:
+                for period, info in data.items():
+                    info["ran"] = False
+            else:
+                data["ran"] = False
                         
                         
          
