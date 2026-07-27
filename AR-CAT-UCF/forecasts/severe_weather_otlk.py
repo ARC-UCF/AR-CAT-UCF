@@ -178,7 +178,7 @@ class SevereWeatherOtlk():
                 
                 if highest_risk == "None": highest_risk = risk_label
                 
-                if RISK_ORDER.index(highest_risk) < risk_label:
+                if RISK_ORDER.index(highest_risk) < RISK_ORDER.index(risk_label):
                     log.info(f"{risk_label} is replacing {highest_risk} as the highest risk for this day.")
                     highest_risk = risk_label
                 
