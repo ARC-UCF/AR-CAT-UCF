@@ -161,34 +161,35 @@ class SevereWeatherOtlk():
             return None, None
         
     def create_day_information(self, day: str, hits: dict, risks: dict[str, RiskArea]) -> tuple[str, str, str]:
-        valid_str = datetime.fromisoformat(risks[0].valid)
-        expires_str = datetime.fromisoformat[risks[0].expires]
+        valid_str = datetime.fromisoformat(risks[0].valid) # Grab the valid time for the day based on the first risk in the table.
+        expires_str = datetime.fromisoformat[risks[0].expires] # Grab the expired time from that same risk.
         
-        header = f"$d Severe Weather Outlook From {valid_str} to {expires_str}"
+        header = f"$d Severe Weather Outlook From {valid_str} to {expires_str}" # Put the valid time and expire time in the header of the message.
         
-        highest_risk = "None"
+        highest_risk = "None" # Set the highest risk to none by default.
         
-        header = header.replace("$d", conversions[day])
+        header = header.replace("$d", conversions[day]) # Replace the "day_#" format in the header with the "Day #" format
         
-        base_body = f"The following counties are in the following severe weather risks: \n"
+        base_body = f"The following counties are in the following severe weather risks: \n" # The base of the string body, which will list counties impacted.
         
-        if hits is not None:
-            for risk_label in risks.keys():
-                base_body += f"**In the {risk_names_full[risk_label]} risk:**"
+        if hits is not None: # If we got hits
+            for risk_label in risks.keys(): # Begin indexing each risk label by the risk dictionary keys.
+                base_body += f"**In the {risk_names_full[risk_label]} risk:**" # Using the risk label key, fetch the full name of the risk, and then attach it as a header for a section.
+                # This effectively lets us display which counties are in each risk.
                 
-                if highest_risk == "None": highest_risk = risk_label
+                if highest_risk == "None": highest_risk = risk_label # If no previous highest risk has been set, set it to the current risk.
                 
-                if RISK_ORDER.index(highest_risk) < RISK_ORDER.index(risk_label):
+                if RISK_ORDER.index(highest_risk) < RISK_ORDER.index(risk_label): # Check the risk. If the highest risk is a lower priority then the current risk, set the highest risk to the current risk.
                     log.info(f"{risk_label} is replacing {highest_risk} as the highest risk for this day.")
                     highest_risk = risk_label
                 
-                for county, risk in hits.items():
-                    if risk_label == risk:
-                        base_body += f"{county} County\n"
+                for county, risk in hits.items(): # For each county and their risk, compare.
+                    if risk_label == risk: # If the county's risk assignment is equal to the current risk we're indexing...
+                        base_body += f"{county} County\n" # ...add it to the string of counties.
                         
-                base_body += "\n"
+                base_body += "\n" # Padding at the bottom for any extra strings (which we will add)
                 
-        return highest_risk, base_body, header
+            return highest_risk, base_body, header # Return the highest risk, the message body, and the header.
                         
                         
                         
