@@ -1,4 +1,3 @@
-from bot import client
 import discord
 import aiohttp
 from logger import log
