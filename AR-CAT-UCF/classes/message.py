@@ -7,9 +7,9 @@ class Message():
     id: str
     header: str
     message: str
-    footer: str | None = None
     channel: str
     schedule: Schedule
+    footer: str | None = None
     last_sent: datetime | None = None
     
     @classmethod

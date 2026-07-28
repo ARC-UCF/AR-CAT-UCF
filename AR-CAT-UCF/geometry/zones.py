@@ -28,9 +28,9 @@ class Zones():
     def determine_state_appendix(self):
         for c in COUNTIES: 
             parts = c.lower().strip().split(",")
-            state_appendix = parts[1].strip()
-            if state_appendix not in self.StateAppendixs:
-                self.StateAppendixs[state_appendix] = state_appendix
+            state_app = parts[1].strip()
+            if state_app not in self.state_appendix:
+                self.state_appendix[state_app] = state_app
             else: 
                 log.info(f"Appendix already included.")
                 
