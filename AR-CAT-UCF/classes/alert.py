@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from dataclasses import dataclass
 from typing import Optional
-from logging.syslogger import log
+from logger import log
 import re
 
 @dataclass(eq=True)

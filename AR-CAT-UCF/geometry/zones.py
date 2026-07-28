@@ -6,7 +6,7 @@ IGNORE_ZONES = [ # These zones, uh, are weird, and they make the bot break. So w
 from config import config
 from databases import fetch_zone_data, write_zone_data 
 from helpers import fetch_url_with_header
-from logging.syslogger import log
+from logger import log
 
 COUNTIES = config.counties_to_watch
 

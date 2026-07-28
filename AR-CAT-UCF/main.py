@@ -1,5 +1,5 @@
 from bot import login
-from logging.syslogger import log
+from logger import log
 
 
 def run():

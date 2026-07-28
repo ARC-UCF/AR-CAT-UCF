@@ -1,5 +1,5 @@
 from datetime import datetime
-from logging.syslogger import log
+from logger import log
 
 class TimeManager():
     def __init__(self):

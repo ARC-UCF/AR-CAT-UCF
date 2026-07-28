@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ET
 import re
 import requests
 from bs4 import BeautifulSoup
-from logging.syslogger import log
+from logger import log
 from helpers import channels, post_embed_with_image
 import discord
 from config import config

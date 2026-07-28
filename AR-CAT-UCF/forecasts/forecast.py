@@ -1,4 +1,4 @@
-from logging.syslogger import log
+from logger import log
 from forecasts import DailyForecast, HurricaneForecasts, SevereWeatherOtlk, TimeManager
 import asyncio
 

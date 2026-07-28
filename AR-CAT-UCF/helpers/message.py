@@ -1,7 +1,7 @@
 from bot import client
 import discord
 import aiohttp
-from logging.syslogger import log
+from logger import log
 import asyncio
 
 async def post_message(channel, content) -> bool:

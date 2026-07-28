@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from logging.syslogger import log
+from logger import log
 
 @dataclass(eq=True)
 class RiskArea():

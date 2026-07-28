@@ -1,5 +1,5 @@
 import requests
-from logging.syslogger import log
+from logger import log
 import aiohttp
 
 def fetch_url_with_header(url, header):

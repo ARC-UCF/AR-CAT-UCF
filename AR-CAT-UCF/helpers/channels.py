@@ -1,5 +1,5 @@
 import config
-from logging.syslogger import log
+from logger import log
 
 from bot import client
 

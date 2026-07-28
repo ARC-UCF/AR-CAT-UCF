@@ -1,4 +1,4 @@
-from logging.syslogger import log
+from logger import log
 from pyrosm import OSM
 from pathlib import Path
 

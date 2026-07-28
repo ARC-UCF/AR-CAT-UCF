@@ -1,5 +1,5 @@
 import json
-from logging.syslogger import log
+from logger import log
 
 FILE_LOCATION = "databases/hurricane.json"
 

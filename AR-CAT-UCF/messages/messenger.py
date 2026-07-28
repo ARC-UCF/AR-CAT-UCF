@@ -1,7 +1,7 @@
 from classes import Schedule, Message
 from databases import write_messages, fetch_messages
 from helpers import post_message
-from logging.syslogger import log
+from logger import log
 from datetime import datetime, timedelta
 import asyncio
 import discord

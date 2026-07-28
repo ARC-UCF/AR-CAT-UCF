@@ -2,7 +2,7 @@ from .bot import client
 from config import config
 import discord
 from discord.ext import tasks
-from logging.syslogger import log
+from logger import log
 
 @client.event
 async def on_ready():

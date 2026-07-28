@@ -3,7 +3,7 @@ from discord.ext import commands
 from alerts import Alerts
 from messages import Messenger
 from forecasts import ForecastManager
-from logging.syslogger import log
+from logger import log
 import asyncio
 
 intents = discord.Intents(dm_messages=True, guild_messages=True, guilds=True, members=True, message_content=True, guild_reactions=True)

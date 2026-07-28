@@ -1,4 +1,4 @@
-from logging.syslogger import log
+from logger import log
 from datetime import datetime, time
 from geometry import zones, generate_outlook_image
 from shapely.geometry import shape

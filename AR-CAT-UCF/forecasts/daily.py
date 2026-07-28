@@ -1,4 +1,4 @@
-from logging.syslogger import log
+from logger import log
 from config import config
 from datetime import datetime, time
 from helpers import post_message, fetch_url_with_header, channels

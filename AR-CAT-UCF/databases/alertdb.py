@@ -1,5 +1,5 @@
 import json
-from logging.syslogger import log
+from logger import log
 from dataclasses import asdict
 
 FILE_LOCATION = "databases/alerts.json"

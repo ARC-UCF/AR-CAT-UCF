@@ -7,7 +7,7 @@ from shapely.geometry import Point, shape
 import matplotlib.pyplot as plt
 from io import BytesIO
 from config import config
-from logging.syslogger import log
+from logger import log
 from geometry import zones
 from classes import RiskArea
 
