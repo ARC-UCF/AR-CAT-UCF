@@ -1,5 +1,5 @@
 from config import config
-from logging.syslogger import log
+from logging import log
 import difflib
 from datetime import datetime, timezone, timedelta
 from geometry import zones
