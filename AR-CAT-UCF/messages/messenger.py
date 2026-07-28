@@ -2,7 +2,7 @@ from classes import Schedule, Message
 from databases import write_messages, fetch_messages
 from helpers import post_message
 from logging.syslogger import log
-from datetime import datetime
+from datetime import datetime, timedelta
 import asyncio
 import discord
 from config import config
@@ -21,7 +21,7 @@ class Messenger():
                     days=1,
                     hours=12,
                     minutes=0,
-                    grace_period=30
+                    grace_period=timedelta(minutes=30)
                 )
             ),
             Message.new(
@@ -35,7 +35,7 @@ class Messenger():
                     days=31,
                     hours=12,
                     minutes=0,
-                    grace_period=30
+                    grace_period=timedelta(minutes=30)
                 )
             ),
             Message.new(
@@ -49,7 +49,7 @@ class Messenger():
                     days=31,
                     hours=12,
                     minutes=0,
-                    grace_period=30
+                    grace_period=timedelta(minutes=30)
                 )
             )
         }
