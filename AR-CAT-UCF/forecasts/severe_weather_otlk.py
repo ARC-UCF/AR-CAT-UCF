@@ -189,9 +189,7 @@ class SevereWeatherOtlk():
                         
                 base_body += "\n" # Padding at the bottom for any extra strings (which we will add)
                 
-            return highest_risk, base_body, header # Return the highest risk, the message body, and the header.
-                        
-                        
+            return highest_risk, base_body, header # Return the highest risk, the message body, and the header.    
                         
     def run_check(self, day) -> tuple[dict, dict[str, RiskArea], str, str, str]:
         hits, risks = self.check_outlook_day(day=day)
@@ -205,9 +203,6 @@ class SevereWeatherOtlk():
         else:
             log.critical(f"Failed to return necessary information for severe weather outlooks!")
             return None, None, None, None, None
-        
-        
-                    
         
     async def check_and_post(self):
         log.info(f"Running severe weather outlook check at {datetime.isoformat(datetime.now())}")
@@ -257,6 +252,10 @@ class SevereWeatherOtlk():
         
         if to_post is not None:
             success = await self.push_posts(to_post=to_post)
+            
+            if success: return True
+            
+            return False
         
     async def push_posts(self, to_post: dict) -> bool:
         for day, data in to_post.items():

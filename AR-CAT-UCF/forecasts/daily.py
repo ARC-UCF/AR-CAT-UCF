@@ -84,7 +84,12 @@ class DailyForecast():
             
             embed.add_field(name=fullName, value=description, inline=False)
             
-        await post_message(forecastChannel, embed)
+        success = await post_message(forecastChannel, embed)
+        
+        if success:
+            return True
+        
+        return False
         
     def check_time(self):
         currentTime = datetime.now().time()
@@ -109,4 +114,11 @@ class DailyForecast():
         if post:
             days = self.get_forecasts()
             
-            await self.post_forecasts(days=days, time_of_day=period)
+            success = await self.post_forecasts(days=days, time_of_day=period)
+            
+            if success: return True
+            
+            return False
+        
+        return True
+            

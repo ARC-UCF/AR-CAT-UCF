@@ -37,13 +37,24 @@ class Alerts():
             "Minor": 0xFFFF00,     # Yellow
             "Unknown": 0x808080    # Gray
         }
+        self.load_alerts()
         
     async def cycle(self) -> dict:
         log.info("Running cycle")
         
         await self._filter_alerts()
         
-        asyncio.sleep()
+        log.info(f"Posting alerts")
+        
+        await self.post_alerts()
+        
+        asyncio.sleep(30)
+        
+        log.info(f"Refreshing alerts.")
+        
+        await self._refresh_current_alerts()
+        
+        asyncio.sleep(30)
         
     def normalize(self, text: str) -> str:
         return text.lower().strip()
@@ -210,6 +221,7 @@ class Alerts():
                 
                 log.info(f"Finished sending alert {alert.id} for {alert.counties}")
                 log.info(f"Moving onto next alert")
+                alert.posted = True
                 
                 await asyncio.sleep(5)
                         
@@ -302,7 +314,7 @@ class Alerts():
         if not refAlerts["features"]: log.error(f"Unable to find features property for old alerts."); return
         
         for alert in alert["features"]:
-            if not alert["id"]: log.error(f"This alert has no id") # Id is separate from properties, so we check id first.
+            if not alert["id"]: log.error(f"This alert has no id"); continue # Id is separate from properties, so we check id first.
             
             aid = alert["id"]
             
@@ -341,7 +353,7 @@ class Alerts():
                             localAlert.references = references
                     
         
-    async def _fetch_active_alerts(self) -> dict:
+    async def _fetch_active_alerts(self) -> list[Alert]:
         compiled_alerts = []
         
         if not self.initialized:

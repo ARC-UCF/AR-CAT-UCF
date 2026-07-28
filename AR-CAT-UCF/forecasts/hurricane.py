@@ -127,6 +127,8 @@ class HurricaneForecasts():
     async def run_check(self):
         post, period = self.time_to_post()
         
+        success = False
+        
         if post:
             image, text = self._poll_hurricane_info()
             
@@ -139,15 +141,15 @@ class HurricaneForecasts():
                     self.previousDiscussion["discussion"] = text
                     self.previousDiscussion["timestamp"] = datetime.now()
                     
-                    await self.post_hurricane(image=image, text=text)
+                    success = await self.post_hurricane(image=image, text=text)
                 else:
                     if period == "Morning":
-                        await self.post_continuous_hurricane()
+                        success = await self.post_continuous_hurricane()
             else:
                 self.previousDiscussion["discussion"] = text
                 self.previousDiscussion["timestamp"] = datetime.now()
                 
-                await self.post_hurricane(image=image, text=text)
+                success = await self.post_hurricane(image=image, text=text)
                 
             iso_string = datetime.isoformat(self.previousDiscussion["timestamp"])
             
@@ -157,6 +159,12 @@ class HurricaneForecasts():
             }
             
             write_hurricane(pkg)
+            
+            if success: return True
+            
+            return False
+        
+        return True
             
             
     async def post_hurricane(self, image, text):
@@ -176,8 +184,10 @@ class HurricaneForecasts():
         
         if success:
             log.info(f"Sucessfully sent HURRICANE INFO")
+            return True
         else:
             log.error(f"Failed to send hurricane info")
+            return False
             
     async def post_continuous_hurricane(self, image, text):
         embed = discord.Embed(
@@ -196,8 +206,10 @@ class HurricaneForecasts():
                 
         if success:
             log.info(f"Sucessfully sent HURRICANE INFO")
+            return True
         else:
             log.error(f"Failed to send hurricane info")
+            return False
                     
             
     def fetch_previous(self) -> tuple[bool, str]:
