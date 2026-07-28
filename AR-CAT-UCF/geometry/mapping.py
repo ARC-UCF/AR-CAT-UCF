@@ -70,7 +70,10 @@ def generate_outlook_image(risks: dict[str, RiskArea]):
     parks = gpd.read_file(geodat_gpkg, layer="parks") # Not used, but decided it's still worth keeping in the code just in case we eventually have a use for this.
     lakes = gpd.read_file(geodat_gpkg, layer="lakes")
     waterways = gpd.read_file(geodat_gpkg, layer="waterways")
-    roads = gpd.read_file(geodat_gpkg, layer="roads")
+    roads = gpd.read_file(geodat_gpkg, layer="roads") # Not used, but still worth keeping around
+    interstates = gpd.read_file(geodat_gpkg, layer="interstates")
+    major_highways = gpd.read_file(geodat_gpkg, layer="major_highways")
+    secondary_highways = gpd.read_file(geodat_gpkg, layer="secondary_highways")
     counties=gpd.read_file(census_shp)
     counties=counties.to_crs(ccrs.PlateCarree())
         
@@ -91,7 +94,7 @@ def generate_outlook_image(risks: dict[str, RiskArea]):
         facecolor="#333333",
         edgecolor="#858585",
         linewidth=1,
-        zorder=10
+        zorder=11
     )
         
     coastline.plot(
@@ -99,7 +102,7 @@ def generate_outlook_image(risks: dict[str, RiskArea]):
         facecolor=None,
         edgecolor="#858585",
         linewidth=1,
-        zorder=11
+        zorder=12
     )
         
     lakes.plot(
@@ -107,7 +110,7 @@ def generate_outlook_image(risks: dict[str, RiskArea]):
         facecolor="#2d73b5",
         edgecolor=None,
         linewidth=1,
-        zorder=9
+        zorder=10
     )
         
     waterways.plot(
@@ -115,15 +118,31 @@ def generate_outlook_image(risks: dict[str, RiskArea]):
         facecolor="#2d73b5",
         edgecolor=None,
         linewidth=1,
-        zorder=8
+        zorder=9
     )
         
-    roads.plot(
+    interstates.plot(
         ax=ax,
         facecolor="#d22c2c",
         edgecolor=None,
         linewidth=1,
+        zorder=6
+    )
+    
+    major_highways.plot(
+        ax=ax,
+        facecolor="#d2c1c1",
+        edgecolor=None,
+        linewidth=1,
         zorder=7
+    )
+    
+    secondary_highways.plot(
+        ax=ax,
+        facecolor="#9a8282",
+        edgecolor=None,
+        linewidth=1,
+        zorder=8
     )
         
     for _, place in places.iterrows():
@@ -176,6 +195,9 @@ def generate_alert_image(coords, coordBase, alertCode):
     lakes = gpd.read_file(geodat_gpkg, layer="lakes")
     waterways = gpd.read_file(geodat_gpkg, layer="waterways")
     roads = gpd.read_file(geodat_gpkg, layer="roads")
+    interstates = gpd.read_file(geodat_gpkg, layer="interstates")
+    major_highways = gpd.read_file(geodat_gpkg, layer="major_highways")
+    secondary_highways = gpd.read_file(geodat_gpkg, layer="secondary_highways")
     counties=gpd.read_file(census_shp)
     counties=counties.to_crs(ccrs.PlateCarree())
     
@@ -207,14 +229,6 @@ def generate_alert_image(coords, coordBase, alertCode):
     
     ax.set_facecolor("#2d73b5")
     
-    counties.plot(
-        ax=ax,
-        facecolor="#333333",
-        edgecolor="#858585",
-        linewidth=1,
-        zorder=10
-    )
-    
     alert.plot(
         ax=ax,
         facecolor=polygonColor,
@@ -224,33 +238,57 @@ def generate_alert_image(coords, coordBase, alertCode):
         zorder=1
     )
     
+    counties.plot(
+        ax=ax,
+        facecolor="#333333",
+        edgecolor="#858585",
+        linewidth=1,
+        zorder=11
+    )
+            
     coastline.plot(
         ax=ax,
         facecolor=None,
         edgecolor="#858585",
         linewidth=1,
-        zorder=11
+        zorder=12
     )
-    
+            
     lakes.plot(
+        ax=ax,
+        facecolor="#2d73b5",
+        edgecolor=None,
+        linewidth=1,
+        zorder=10
+    )
+            
+    waterways.plot(
         ax=ax,
         facecolor="#2d73b5",
         edgecolor=None,
         linewidth=1,
         zorder=9
     )
-    
-    waterways.plot(
-        ax=ax,
-        facecolor="#2d73b5",
-        edgecolor=None,
-        linewidth=1,
-        zorder=8
-    )
-    
-    roads.plot(
+            
+    interstates.plot(
         ax=ax,
         facecolor="#d22c2c",
+        edgecolor=None,
+        linewidth=1,
+        zorder=6
+    )
+        
+    major_highways.plot(
+        ax=ax,
+        facecolor="#d2c1c1",
+        edgecolor=None,
+        linewidth=1,
+        zorder=7
+    )
+        
+    secondary_highways.plot(
+        ax=ax,
+        facecolor="#9a8282",
         edgecolor=None,
         linewidth=1,
         zorder=8
