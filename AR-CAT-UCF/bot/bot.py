@@ -3,7 +3,7 @@ from discord.ext import commands
 from alerts import Alerts
 from messages import Messenger
 from forecasts import ForecastManager
-from helpers import AsyncLinks
+from helpers import AsyncLinks, channels
 from logger import log
 import asyncio
 
@@ -23,6 +23,7 @@ class CAT(commands.Bot):
         
     async def setup_hook(self):
         await AsyncLinks.setup()
+        channels.sync_channels(self)
         
         self.alerts_task = asyncio.create_task(
             self.check_alerts()
