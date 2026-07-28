@@ -1,6 +1,7 @@
 from logger import log
 from pyrosm import OSM
 from pathlib import Path
+import geopandas as gpd
 
 class GeoDataHandler():
     def __init__(self):
@@ -16,17 +17,20 @@ class GeoDataHandler():
         self._checkForPBF(geodata_dir)
         self._checkForSHP(base_dir)
         
-        self._extractRequiredFiles(geodata_dir)
+        origin_file = geodata_dir / "florida.gpkg"
+        export_file = geodata_dir / "florida_export.gpkg"
+        
+        self._createSimpleGPKG(origin_file, export_file)
         
         
     def _checkForPBF(self, pathToCheck):
-        file_path = pathToCheck / "florida-260723.osm.pbf"
+        file_path = pathToCheck / "florida.gpkg"
         
         print(file_path)
         
         if not file_path.exists():
-            log.critical(f"The required .osm.pbf file for Florida does not exist!")
-            raise FileNotFoundError(f"The required .osm.pbf file does not exist! Make sure to install the required .osm.pbf file for the state of Florida!")
+            log.critical(f"The required .gpkg file for Florida does not exist!")
+            raise FileNotFoundError(f"The required .gpkg file does not exist! Make sure to install the required .osm.pbf file for the state of Florida!")
         else:
             log.info(f"Found the file at {file_path}")
             
@@ -41,142 +45,94 @@ class GeoDataHandler():
         else:
             log.info(f"Found the file at {fullPath}")
             
-    def _extractRequiredFiles(self, pathToCheck):
-        file_path = pathToCheck / "florida-260723.osm.pbf"
+    def _createSimpleGPKG(self, filePath, exportPath):
         
-        package_path = pathToCheck / "florida.gpkg"
+        if exportPath.exists():
+            
+            log.info(f"Found file at {exportPath}")
+            
+            return
         
-        osm = OSM(filepath=file_path)
+        roads = gpd.read_file(
+            filePath,
+            layer = "gis_osm_roads_free"
+        )
+        water = gpd.read_file(
+            filePath,
+            layer = "gis_osm_water_a_free"
+        )
+        waterways = gpd.read_file(
+            filePath,
+            layer = "gis_osm_waterways_free"
+        )
+        places = gpd.read_file(
+            filePath,
+            layer = "gis_osm_places_free"
+        )
+        landuse = gpd.read_file(
+            filePath,
+            layer = "gis_osm_landuse_a_free"
+        )
         
-        if not package_path.exists():
-            log.info(f"Package path does not exist; beginning extraction and placement of file.")
-            
-            roads = osm.get_network(network_type="driving")
-            
-            interstates = roads[roads["highway"] == "motorway"]
-            
-            major_highways = roads[
-                roads["highway"].isin([
-                    "trunk",
-                    "primary"
-                ])
-            ]
-            
-            secondary_highways = roads[
-                roads["highway"].isin([
-                    "secondary",
-                    "tertiary"
-                ])
-            ]
-            
-            log.info(f"Got roads")
-                    
-            waterways = osm.get_data_by_custom_criteria(
-                custom_filter={"waterway": True},
-                filter_type="keep"
-            )
-            
-            log.info("got waterways")
-                    
-            lakes = osm.get_data_by_custom_criteria(
-                custom_filter={"natural": ["water"]},
-                filter_type="keep"
-            )
-            
-            log.info(f"Got lakes")
-                    
-            parks = osm.get_data_by_custom_criteria(
-                custom_filter={"leisure": ["park"]},
-                filter_type="keep"
-            )
-            
-            log.info(f"Got parks")
-                    
-            places = osm.get_data_by_custom_criteria(
-                custom_filter={
-                    "place":    [
-                        "city",
-                        "town"
-                    ]
-                },
-                filter_type="keep"
-            )
-            
-            log.info(f"Got places")
-            
-            coastline = osm.get_data_by_custom_criteria(
-                custom_filter={"natural": ["coastline"]},
-                filter_type="keep"
-            )
-            
-            log.info(f"Got coastline")
-            
-            log.info(f"Beginning file creation")
-            
-            roads.to_file(
-                "florida.gpkg",
-                layer="roads",
-                driver="GPKG"
-            )
-            
-            interstates.to_file(
-                "florida.gpkg",
-                layer="interstates",
-                driver="GPKG"
-            )
-            
-            major_highways.to_file(
-                "florida.gpkg",
-                layer="major_highways",
-                driver="GPKG"
-            )
-            
-            secondary_highways.to_file(
-                "florida.gpkg",
-                layer="secondary_highways",
-                driver="GPKG"
-            )
-            
-            log.info(f"Roads to file")
-            
-            waterways.to_file(
-                "florida.gpkg",
-                layer="waterways",
-                driver="GPKG"
-            )
-            
-            log.info("Waterways to file")
-            
-            lakes.to_file(
-                "florida.gpkg",
-                layer="lakes",
-                driver="GPKG"
-            )
-            
-            log.info(f"Lakes to file")
-            
-            parks.to_file(
-                "florida.gpkg",
-                layer="parks",
-                driver="GPKG"
-            )
-            
-            log.info("Parks to file")
-            
-            places.to_file(
-                "florida.gpkg",
-                layer="places",
-                driver="GPKG"
-            )
-            
-            log.info(f"Places to file")
-            
-            coastline.to_file(
-                "florida.gpkg",
-                layer="coastline",
-                driver="GPKG"
-            )
-            
-            log.info(f"Coastline to file")
+        major_roads = roads[
+            roads["fclass"].isin([
+                "motorway",
+                "motorway_link",
+                "trunk",
+                "trunk_link",
+                "primary",
+                "primary_link",
+                "secondary"
+                "secondary_link",
+            ])
+        ]
+        
+        lakes = water[
+            water["fclass"].isin([
+                "water",
+                "wetland",
+                "resovoir"
+            ])
+        ]
+        
+        rivers = waterways[
+            waterways["fclass"].isin([
+                "river",
+                "stream",
+                "canal"
+            ])
+        ]
+        
+        locations = places[
+            places["fclass"].isin([
+                "city",
+                "town"
+            ])
+        ]
+        
+        major_roads.to_file(
+            exportPath,
+            layer="roads",
+            driver="GPKG"
+        )
+        
+        lakes.to_file(
+            exportPath,
+            layer="lakes",
+            driver="GPKG"
+        )
+        
+        rivers.to_file(
+            exportPath,
+            layer="waterways",
+            driver="GPKG"
+        )
+        
+        locations.to_file(
+            exportPath,
+            layer="places",
+            driver="GPKG"
+        )
+        
             
 GeoHandler = GeoDataHandler()

@@ -63,17 +63,12 @@ def ucf_in_or_near_polygon(geodat) -> tuple[bool, str]:
     return False, ""
 
 def generate_outlook_image(risks: dict[str, RiskArea]):
-    geodat_gpkg = base_dir / "geometry" / "geodata" / "florida.gpkg"
+    geodat_gpkg = base_dir / "geometry" / "geodata" / "florida_export.gpkg"
         
-    coastline = gpd.read_file(geodat_gpkg, layer="coastline")
     places = gpd.read_file(geodat_gpkg, layer="places")
-    parks = gpd.read_file(geodat_gpkg, layer="parks") # Not used, but decided it's still worth keeping in the code just in case we eventually have a use for this.
     lakes = gpd.read_file(geodat_gpkg, layer="lakes")
     waterways = gpd.read_file(geodat_gpkg, layer="waterways")
     roads = gpd.read_file(geodat_gpkg, layer="roads") # Not used, but still worth keeping around
-    interstates = gpd.read_file(geodat_gpkg, layer="interstates")
-    major_highways = gpd.read_file(geodat_gpkg, layer="major_highways")
-    secondary_highways = gpd.read_file(geodat_gpkg, layer="secondary_highways")
     counties=gpd.read_file(census_shp)
     counties=counties.to_crs(ccrs.PlateCarree())
         
@@ -97,14 +92,6 @@ def generate_outlook_image(risks: dict[str, RiskArea]):
         zorder=11
     )
         
-    coastline.plot(
-        ax=ax,
-        facecolor=None,
-        edgecolor="#858585",
-        linewidth=1,
-        zorder=12
-    )
-        
     lakes.plot(
         ax=ax,
         facecolor="#2d73b5",
@@ -121,28 +108,12 @@ def generate_outlook_image(risks: dict[str, RiskArea]):
         zorder=9
     )
         
-    interstates.plot(
+    roads.plot(
         ax=ax,
         facecolor="#d22c2c",
         edgecolor=None,
         linewidth=1,
         zorder=6
-    )
-    
-    major_highways.plot(
-        ax=ax,
-        facecolor="#d2c1c1",
-        edgecolor=None,
-        linewidth=1,
-        zorder=7
-    )
-    
-    secondary_highways.plot(
-        ax=ax,
-        facecolor="#9a8282",
-        edgecolor=None,
-        linewidth=1,
-        zorder=8
     )
         
     for _, place in places.iterrows():
@@ -187,17 +158,12 @@ def generate_outlook_image(risks: dict[str, RiskArea]):
     return buf
 
 def generate_alert_image(coords, coordBase, alertCode):
-    geodat_gpkg = base_dir / "geometry" / "geodata" / "florida.gpkg"
+    geodat_gpkg = base_dir / "geometry" / "geodata" / "florida_export.gpkg"
     
-    coastline = gpd.read_file(geodat_gpkg, layer="coastline")
     places = gpd.read_file(geodat_gpkg, layer="places")
-    parks = gpd.read_file(geodat_gpkg, layer="parks") # Not used, but decided it's still worth keeping in the code just in case we eventually have a use for this.
     lakes = gpd.read_file(geodat_gpkg, layer="lakes")
     waterways = gpd.read_file(geodat_gpkg, layer="waterways")
     roads = gpd.read_file(geodat_gpkg, layer="roads")
-    interstates = gpd.read_file(geodat_gpkg, layer="interstates")
-    major_highways = gpd.read_file(geodat_gpkg, layer="major_highways")
-    secondary_highways = gpd.read_file(geodat_gpkg, layer="secondary_highways")
     counties=gpd.read_file(census_shp)
     counties=counties.to_crs(ccrs.PlateCarree())
     
@@ -246,14 +212,6 @@ def generate_alert_image(coords, coordBase, alertCode):
         zorder=11
     )
             
-    coastline.plot(
-        ax=ax,
-        facecolor=None,
-        edgecolor="#858585",
-        linewidth=1,
-        zorder=12
-    )
-            
     lakes.plot(
         ax=ax,
         facecolor="#2d73b5",
@@ -270,28 +228,12 @@ def generate_alert_image(coords, coordBase, alertCode):
         zorder=9
     )
             
-    interstates.plot(
+    roads.plot(
         ax=ax,
         facecolor="#d22c2c",
         edgecolor=None,
         linewidth=1,
         zorder=6
-    )
-        
-    major_highways.plot(
-        ax=ax,
-        facecolor="#d2c1c1",
-        edgecolor=None,
-        linewidth=1,
-        zorder=7
-    )
-        
-    secondary_highways.plot(
-        ax=ax,
-        facecolor="#9a8282",
-        edgecolor=None,
-        linewidth=1,
-        zorder=8
     )
     
     for _, place in places.iterrows():
