@@ -3,6 +3,7 @@ from discord.ext import commands
 from alerts import Alerts
 from messages import Messenger
 from forecasts import ForecastManager
+from helpers import AsyncLinks
 from logger import log
 import asyncio
 
@@ -15,7 +16,14 @@ class CAT(commands.Bot):
         self.messenger = Messenger()
         self.forecastManager = ForecastManager()
         
+    async def close(self):
+        log.info(f"Closing bot.")
+        await AsyncLinks.close()
+        await super().close()
+        
     async def setup_hook(self):
+        await AsyncLinks.setup()
+        
         self.alerts_task = asyncio.create_task(
             self.check_alerts()
         )

@@ -38,7 +38,14 @@ def fetch_url(url):
 
 class ALinks():
     def __init__(self):
+        self.session = None
+        
+    async def setup(self):
         self.session = aiohttp.ClientSession()
+        
+    async def close(self):
+        if self.session is not None:
+            await self.session.close()
         
     async def fetch_url_with_header(self, url, header):
         async with self.session.get(url, headers=header) as response:
