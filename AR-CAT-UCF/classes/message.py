@@ -24,19 +24,19 @@ class Message():
             schedule=schedule
         )
     
-    @property
-    def to_dict(cls):
+    
+    def to_dict(self):
         return {
-            "id": cls.id,
-            "header": cls.header,
-            "message": cls.message,
-            "footer": cls.footer,
-            "channel": cls.channel,
-            "schedule": cls.schedule.to_dict(),
-            "last_sent": (cls.last_sent.isoformat() if cls.last_sent is not None else None)
+            "id": self.id,
+            "header": self.header,
+            "message": self.message,
+            "footer": self.footer,
+            "channel": self.channel,
+            "schedule": self.schedule.to_dict(),
+            "last_sent": (self.last_sent.isoformat() if self.last_sent is not None else None)
         }
         
-    @property
+    @classmethod
     def from_dict(cls, data):
         return cls(
             id=data["id"],

@@ -31,5 +31,6 @@ class RiskArea():
             issued = props.get("ISSUED_ISO", ""),
             stroke = props.get("stroke"),
             fill = props.get("fill"),
+            display_num = props.get("DN"),
             geometry = feature.get("geometry")
         )

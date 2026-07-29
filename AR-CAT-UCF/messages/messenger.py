@@ -9,7 +9,7 @@ from config import config
 
 class Messenger():
     def __init__(self):
-        self.preset_messages = {
+        self.preset_messages = [
             Message.new(
                 id="hurr_1_month",
                 header="Hurricane Season Starts Soon: Are You Prepared?",
@@ -52,7 +52,7 @@ class Messenger():
                     grace_period=timedelta(minutes=30)
                 )
             )
-        }
+        ]
         self.messages_cache: dict[str, Message] = {}
         
         self._read_messages()
@@ -63,8 +63,8 @@ class Messenger():
         msgs = fetch_messages()
         
         if msgs:
-            for msg in msgs:
-                Msg: Message = Message.from_dict(msg)
+            for key, msg in msgs.items():
+                Msg: Message = Message.from_dict(data=msg)
                 
                 self.messages_cache[Msg.id] = Msg
                 
@@ -85,7 +85,7 @@ class Messenger():
     
     async def check_and_post(self):
         for key, msg in self.messages_cache.items():
-            if msg.schedule.should_send():
+            if msg.schedule.should_send(msg.last_sent, datetime.now()):
                 embed = discord.Embed(
                     title=msg.header,
                     description=msg.message,
@@ -108,4 +108,4 @@ class Messenger():
             
         write_messages(messages_to_write)
         
-        asyncio.sleep(60)
+        await asyncio.sleep(60)

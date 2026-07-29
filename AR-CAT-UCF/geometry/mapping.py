@@ -5,6 +5,7 @@ from pathlib import Path
 import cartopy.crs as ccrs
 from shapely.geometry import Point, shape
 import matplotlib.pyplot as plt
+import matplotlib.patheffects as pe
 from io import BytesIO
 from config import config
 from logger import log
@@ -33,7 +34,7 @@ meters_to_miles = 1609.34
 
 base_dir = Path(__file__).resolve().parent
 
-census_shp = base_dir / "geometry" / "census_data" / "tI_2025_us_county.shp"
+census_shp = base_dir /  "census_data" / "tl_2025_us_county.shp"
 
 def ucf_in_or_near_polygon(geodat) -> tuple[bool, str]:
     if not geodat:
@@ -41,7 +42,7 @@ def ucf_in_or_near_polygon(geodat) -> tuple[bool, str]:
     
     polygon = shape(geodat)
     
-    gdf_alert = gpd.GeoSeries([polygon], crs="ESPG:4326")
+    gdf_alert = gpd.GeoSeries([polygon], crs="EPSG:4326")
     
     gdf_m = gdf_alert.to_crs(espg=6439)
     
@@ -63,14 +64,19 @@ def ucf_in_or_near_polygon(geodat) -> tuple[bool, str]:
     return False, ""
 
 def generate_outlook_image(risks: dict[str, RiskArea]):
-    geodat_gpkg = base_dir / "geometry" / "geodata" / "florida_export.gpkg"
+    geodat_gpkg = base_dir / "geodata" / "florida_export.gpkg"
         
     places = gpd.read_file(geodat_gpkg, layer="places")
     lakes = gpd.read_file(geodat_gpkg, layer="lakes")
     waterways = gpd.read_file(geodat_gpkg, layer="waterways")
     roads = gpd.read_file(geodat_gpkg, layer="roads") # Not used, but still worth keeping around
     counties=gpd.read_file(census_shp)
-    counties=counties.to_crs(ccrs.PlateCarree())
+    counties=counties.to_crs("EPSG:4326")
+    
+    lakes.to_crs("EPSG:4326")
+    waterways.to_crs("EPSG:4326")
+    roads.to_crs("EPSG:4326")
+    places.to_crs("EPSG:4326")
         
     fig, ax = plt.subplots(
         figsize=(14, 10),
@@ -89,7 +95,8 @@ def generate_outlook_image(risks: dict[str, RiskArea]):
         facecolor="#333333",
         edgecolor="#858585",
         linewidth=1,
-        zorder=11
+        zorder=1,
+        transform=ccrs.PlateCarree(),
     )
         
     lakes.plot(
@@ -97,15 +104,8 @@ def generate_outlook_image(risks: dict[str, RiskArea]):
         facecolor="#2d73b5",
         edgecolor=None,
         linewidth=1,
-        zorder=10
-    )
-        
-    waterways.plot(
-        ax=ax,
-        facecolor="#2d73b5",
-        edgecolor=None,
-        linewidth=1,
-        zorder=9
+        zorder=2,
+        transform=ccrs.PlateCarree(),
     )
         
     roads.plot(
@@ -113,17 +113,9 @@ def generate_outlook_image(risks: dict[str, RiskArea]):
         facecolor="#d22c2c",
         edgecolor=None,
         linewidth=1,
-        zorder=6
+        zorder=4,
+        transform=ccrs.PlateCarree(),
     )
-        
-    for _, place in places.iterrows():
-        ax.text(
-            place.geometry.x,
-            place.geometry.y,
-            place["name"],
-            fontsize=10,
-            ha="center"
-        )
         
     for label, risk in risks.items():
         if risk.geometry is None:
@@ -142,36 +134,46 @@ def generate_outlook_image(risks: dict[str, RiskArea]):
             edgecolor=risk.stroke,
             linewidth=2,
             alpha=0.5,
-            zorder=risk.display_num
+            zorder=risk.display_num+5
         )
         
     buf = BytesIO()
-    plt.tight_layout()
     plt.title(
         label=f"Severe Weather Outlook",
         loc="left",
         fontsize=24
     )
-    plt.savefig(buf, format="png", dpi=200, bbox_inches="tight")
+    plt.subplots_adjust(
+        left=0,
+        right=1,
+        top=1,
+        bottom=0
+    )
+    plt.savefig(buf, format="png", dpi=200)
     buf.seek(0)
     plt.close(fig)
     return buf
 
 def generate_alert_image(coords, coordBase, alertCode):
-    geodat_gpkg = base_dir / "geometry" / "geodata" / "florida_export.gpkg"
+    geodat_gpkg = base_dir /  "geodata" / "florida_export.gpkg"
     
     places = gpd.read_file(geodat_gpkg, layer="places")
     lakes = gpd.read_file(geodat_gpkg, layer="lakes")
     waterways = gpd.read_file(geodat_gpkg, layer="waterways")
     roads = gpd.read_file(geodat_gpkg, layer="roads")
     counties=gpd.read_file(census_shp)
-    counties=counties.to_crs(ccrs.PlateCarree())
+    counties=counties.to_crs("EPSG:4326")
+    
+    lakes.to_crs("EPSG:4326")
+    waterways.to_crs("EPSG:4326")
+    roads.to_crs("EPSG:4326")
+    places.to_crs("EPSG:4326")
     
     alert = None
     
     if coordBase == "Polygon":
         polygon = shape(coords)
-        alert = gpd.GeoDataFrame(geometry=[polygon], crs="ESPG:4326")
+        alert = gpd.GeoDataFrame(geometry=[polygon], crs="EPSG:4326")
     elif coordBase == "County":
         polygons = []
         
@@ -182,11 +184,11 @@ def generate_alert_image(coords, coordBase, alertCode):
             
             polygons.append(polygon)
             
-        alert = gpd.GeoDataFrame(geometry=polygons, crs="ESPG:4326")
+        alert = gpd.GeoDataFrame(geometry=polygons, crs="EPSG:4326")
     
     polygonColor = config.alert_colors.get(alertCode, "None")
     
-    minx, miny, maxx, maxy = polygon.bounds
+    minx, miny, maxx, maxy = alert.total_bounds
     
     fig, ax = plt.subplots(
         figsize=(14, 10),
@@ -201,7 +203,8 @@ def generate_alert_image(coords, coordBase, alertCode):
         edgecolor=polygonColor,
         linewidth=2,
         alpha=0.5,
-        zorder=1
+        zorder=12,
+        transform=ccrs.PlateCarree()
     )
     
     counties.plot(
@@ -209,7 +212,8 @@ def generate_alert_image(coords, coordBase, alertCode):
         facecolor="#333333",
         edgecolor="#858585",
         linewidth=1,
-        zorder=11
+        zorder=1,
+        transform=ccrs.PlateCarree(),
     )
             
     lakes.plot(
@@ -217,46 +221,86 @@ def generate_alert_image(coords, coordBase, alertCode):
         facecolor="#2d73b5",
         edgecolor=None,
         linewidth=1,
-        zorder=10
-    )
-            
-    waterways.plot(
-        ax=ax,
-        facecolor="#2d73b5",
-        edgecolor=None,
-        linewidth=1,
-        zorder=9
+        zorder=2,
+        transform=ccrs.PlateCarree(),
     )
             
     roads.plot(
         ax=ax,
-        facecolor="#d22c2c",
-        edgecolor=None,
+        facecolor=None,
+        edgecolor="#d22c2c",
         linewidth=1,
-        zorder=6
+        zorder=4,
+        transform=ccrs.PlateCarree(),
     )
     
-    for _, place in places.iterrows():
-        ax.text(
-            place.geometry.x,
-            place.geometry.y,
-            place["name"],
-            fontsize=10,
-            ha="center"
-        )
+    visible = places.cx[minx:maxx, miny:maxy]
+    
+    min_dist = 0.04
+    
+    placed = []
+    
+    for _, place in visible.iterrows():
+        if place["fclass"] == "city":
+            text = ax.text(
+                place.geometry.x,
+                place.geometry.y,
+                place["name"],
+                fontsize=8,
+                ha="center",
+                zorder=15,
+                color="white",
+                transform=ccrs.PlateCarree(),
+            )
+                    
+            text.set_path_effects([
+                pe.withStroke(linewidth=2, foreground="black")
+            ])
+        elif place["fclass"] == "town":
+            x = place.geometry.x
+            y = place.geometry.y
+
+            if any((x-px)**2 + (y-py)**2 < min_dist**2 for px, py in placed):
+                continue
+
+            placed.append((x, y))
+            
+            text = ax.text(
+                place.geometry.x,
+                place.geometry.y,
+                place["name"],
+                fontsize=6,
+                ha="center",
+                zorder=14,
+                color="white",
+                transform=ccrs.PlateCarree(),
+            )
+            
+            text.set_path_effects([
+                pe.withStroke(linewidth=1, foreground="black")
+            ])
         
-    lon_pad = 1  # wider east-west
-    lat_pad = .25  # shorter north-south
-    ax.set_extent([minx - lon_pad, maxx + lon_pad, miny - lat_pad, maxy + lat_pad], crs=ccrs.PlateCarree())
+    lon_pad = .5  # wider east-west
+    lat_pad = .1  # shorter north-south
+    
+    print(alert.total_bounds)
+    print(minx, miny, maxx, maxy)
     
     buf = BytesIO()
-    plt.tight_layout()
+    ax.set_extent([minx - lon_pad, maxx + lon_pad, miny - lat_pad, maxy + lat_pad], crs=ccrs.PlateCarree())
     plt.title(
         label=f"Alert Area - {alertCode}",
         loc="left",
         fontsize=24
     )
-    plt.savefig(buf, format="png", dpi=200, bbox_inches="tight")
+    plt.subplots_adjust(
+        left=0,
+        right=1,
+        top=1,
+        bottom=0
+    )
+    plt.savefig(buf, format="png", dpi=200)
+    print(ax.get_extent())
     buf.seek(0)
     plt.close(fig)
     return buf

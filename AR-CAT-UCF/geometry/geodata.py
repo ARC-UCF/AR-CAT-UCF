@@ -82,7 +82,7 @@ class GeoDataHandler():
                 "trunk_link",
                 "primary",
                 "primary_link",
-                "secondary"
+                "secondary",
                 "secondary_link",
             ])
         ]

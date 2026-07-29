@@ -1,5 +1,5 @@
 from config import config
-from logging import log
+from logger import log
 import difflib
 from datetime import datetime, timezone, timedelta
 from geometry import zones
@@ -7,7 +7,7 @@ from helpers import AsyncLinks, channels, post_embed_with_image, post_message
 from classes import Alert
 from databases import fetch_alerts, write_alerts
 import asyncio
-from determiner import determiner
+from alerts.determiner import determiner
 from io import BytesIO
 import discord
 from geometry import generate_alert_image, ucf_in_or_near_polygon
@@ -48,13 +48,15 @@ class Alerts():
         
         await self.post_alerts()
         
-        asyncio.sleep(30)
+        write_alerts(self.ActiveAlerts)
+        
+        await asyncio.sleep(30)
         
         log.info(f"Refreshing alerts.")
         
         await self._refresh_current_alerts()
         
-        asyncio.sleep(30)
+        await asyncio.sleep(30)
         
     def normalize(self, text: str) -> str:
         return text.lower().strip()
@@ -68,7 +70,7 @@ class Alerts():
             self.ActiveAlerts[alert.id] = alert
             
     async def post_alerts(self):
-        for alert in self.ActiveAlerts:
+        for _, alert in self.ActiveAlerts.items():
             if not alert.posted and not alert.ignore:
                 log.info(f"Working alert {alert.id}")
                 
@@ -163,7 +165,7 @@ class Alerts():
                     embed.add_field(name="Precautionary/Preparedness Instructions", value=instruction_text, inline=False)
                     
                 embed.add_field(name="Alert Information", value=infoMessage, inline=False)
-                embed.set_footer(config.version_id)
+                embed.set_footer(text=config.version_id)
                 
                 buf = generate_alert_image(alert.geom, alert.geo_base, alert.same)
                 
@@ -246,7 +248,9 @@ class Alerts():
         if not filtered_alerts: log.warn(f"No active alerts were found in this cycle. This could be an error: considering checking logs. Or, no alerts could be active at the current moment.")
         
         for alert in filtered_alerts:
-            for a in self.ActiveAlerts:
+            if alert is None: continue
+            
+            for _, a in self.ActiveAlerts.items():
                 replaces, method = self._check_for_ref(alert, a)
                 
                 if replaces and method == "references":
@@ -283,8 +287,12 @@ class Alerts():
         
                 
     def _check_for_ref(self, alert1: Alert, alert2: Alert) -> tuple[bool, str]:
-        alert1_refs = alert1.get("references")
-        alert2_refs = alert2.get("references")
+        alert1_refs = alert1.references
+        alert2_refs = alert2.references
+        
+        if alert1_refs or alert2_refs is None:
+            log.info(f"This alert has no references.")
+            return False, "no"
         
         if alert1_refs:
             for r in alert1_refs:
@@ -313,7 +321,7 @@ class Alerts():
         
         if not refAlerts["features"]: log.error(f"Unable to find features property for old alerts."); return
         
-        for alert in alert["features"]:
+        for alert in refAlerts["features"]:
             if not alert["id"]: log.error(f"This alert has no id"); continue # Id is separate from properties, so we check id first.
             
             aid = alert["id"]
@@ -426,7 +434,7 @@ class Alerts():
                     geom = areas
                     coordBase = "County"
                         
-                compiled_alerts.append(Alert.create_alert(feature=alert["features"], props=props, nws_headline=nws_headline, same=same_listing, nws=nws_listing, geom=geom, geom_base=coordBase, counties=counties, parameters=param_values))
+                compiled_alerts.append(Alert.create_alert(id=alert["id"], props=props, nws_headline=nws_headline, same=same_listing[0], nws=nws_listing[0], geom=geom, geom_base=coordBase, counties=counties, parameters=param_values))
                 
         return compiled_alerts
     

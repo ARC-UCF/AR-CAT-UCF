@@ -36,10 +36,10 @@ class Alert():
     geom: Optional[dict | list] = None
     
     @classmethod
-    def create_alert(cls, feature, props, nws_headline, same, nws, geom, geom_base, counties, parameters):
+    def create_alert(cls, id, props, nws_headline, same, nws, geom, geom_base, counties, parameters):
         
         return cls(
-            id=feature["@id"],
+            id=id,
             sent=props.get("sent"),
             expires=props.get("expires"),
             title=nws_headline,
@@ -73,19 +73,16 @@ class Alert():
         
         return datetime.now(timezone.utc) >= datetime.fromisoformat(cls.expires).astimezone(timezone.utc)
     
-    @property
     def ignore_this_alert(cls):
         cls.ignore = True
         
-    @property
+    @classmethod
     def from_dict(cls, data):
         return cls(**data)
         
-    @property
     def _scrub_text(cls, text: str) -> str:
         return re.sub(r'(?<!\n)\n(?!\n)', ' ', text)
         
-    @property
     def get_formatted_text(cls) -> tuple[str, str]:
         return cls._scrub_text(cls.desc), cls._scrub_text(cls.instruction)
     

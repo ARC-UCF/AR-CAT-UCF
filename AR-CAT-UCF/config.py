@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 import os
 from configuration import settings
+from dotenv import load_dotenv
+from logger import log
 
 @dataclass(frozen=True)
 class Config:
@@ -18,9 +20,10 @@ class Config:
     
     @staticmethod
     def load() -> "Config":
+        load_dotenv("sensitive.env")
         token = os.getenv("API-TOKEN")
         guild_id = settings.guild_id
-        contact_header = os.getenv('HEADER')
+        contact_header = {"User-Agent": os.getenv('HEADER')}
         version_id = settings.version
         alert_colors = settings.polygon_colors_SAME
         channels = settings.channels

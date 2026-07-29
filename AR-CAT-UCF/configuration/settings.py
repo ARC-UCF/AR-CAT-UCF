@@ -133,4 +133,6 @@ polygon_colors_SAME = {
     "FRY": "#2B5872", # Beach Hazards Statement
     "WIY": "#FFFEC6", # Wind Advisory
     "HTY": "#DD8962", # Heat Advisory
+    "XHA": "#954141", # Extreme Heat Watch
+    "XHW": "#601919" # Extreme Heat Warning
 } # SMW/MAW for Special Marine Warning

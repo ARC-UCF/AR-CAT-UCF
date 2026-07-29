@@ -1,4 +1,5 @@
 from datetime import datetime, time, timedelta
+import time as time_mod
 import html
 import xml.etree.ElementTree as ET
 import re
@@ -132,6 +133,8 @@ class HurricaneForecasts():
         if post:
             image, text = self._poll_hurricane_info()
             
+            log.critical(image)
+            
             has, previous = self.fetch_previous()
             
             if has:
@@ -174,9 +177,11 @@ class HurricaneForecasts():
             color=0x1e90ff,
         )
         
-        new_url = f"{image}?t={int(time.time())}"
+        new_url = f"{image}?t={int(time_mod.time())}"
         
-        embed.set_footer(config.version_id)
+        log.critical(new_url)
+        
+        embed.set_footer(text=config.version_id)
         
         channel = channels.get_channel_from_name("hurricane")
         
@@ -196,9 +201,10 @@ class HurricaneForecasts():
             color=0x1e90ff,
         )
         
-        new_url = f"{image}?t={int(time.time())}"
+        new_url = f"{image}?t={int(time_mod.time())}"
                 
-        embed.set_footer(config.version_id)
+        embed.set_footer(text=config.version_id)
+        embed.set_image(url=new_url)
                 
         channel = channels.get_channel_from_name("hurricane")
                 
@@ -212,7 +218,7 @@ class HurricaneForecasts():
             return False
                     
             
-    def fetch_previous(self) -> tuple[bool, str]:
+    def fetch_previous(self) -> tuple[bool, str | None]:
         discussion = self.previousDiscussion.get("discussion", "")
         timestamp = self.previousDiscussion.get("timestamp")
         
@@ -227,7 +233,7 @@ class HurricaneForecasts():
             else:
                 return False, None
             
-    def read_prev_discussion(self) -> tuple[bool, str]:
+    def read_prev_discussion(self) -> tuple[bool, str | None]:
         if self.previousDiscussion == None:
             prev = fetch_hurricane()
             
@@ -245,6 +251,8 @@ class HurricaneForecasts():
                     return False, None
                 else:
                     return True, discussion
+        else:
+            return False, None
                 
     def reset_states(self):
         for period in self.ForecastStates:

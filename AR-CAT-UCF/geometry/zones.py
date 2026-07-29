@@ -19,6 +19,7 @@ class Zones():
         self.zone_geometry = {} # Compiled zone geometry. Loads geometry from zonedb first, if available.
         self.request_header = config.contact_header # Configured contact header.
         log.info(f"Initializing zone information")
+        log.info(self.request_header)
         
         self.load_current_zone_db()
         self.determine_state_appendix()

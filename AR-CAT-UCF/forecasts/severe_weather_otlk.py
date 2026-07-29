@@ -138,7 +138,7 @@ class SevereWeatherOtlk():
                     for county_name, geom in zones.zone_geometry.items():
                         county_geom = shape(geom)
                     
-                        true_name = zones.get_zone_geo(county_name)
+                        true_name = zones.name_from_zone(county_name)
                     
                         log.info(f"Comparing {true_name} county with risk geometry.")
                         
@@ -259,7 +259,7 @@ class SevereWeatherOtlk():
         
     async def push_posts(self, to_post: dict) -> bool:
         for day, data in to_post.items():
-            risks = data["risks"] = RiskArea
+            risks = data["risks"]
             highest_risk = data.get("highest_risk", "")
             message = data.get("message", "")
             header = data.get("header", "")

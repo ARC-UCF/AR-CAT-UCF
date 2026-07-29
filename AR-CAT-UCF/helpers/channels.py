@@ -1,4 +1,4 @@
-import config
+from config import config
 from logger import log
 
 class Channels():
@@ -13,7 +13,11 @@ class Channels():
         self.bot = bot
         
         for channel, cid in config.channels.items():
-            self.synced_channels[channel] = self.bot.get_channel(cid)
+            discord_channel = self.bot.get_channel(cid)
+            
+            log.info(f"Syncing {channel}: {cid} -> {discord_channel}")
+            
+            self.synced_channels[channel] = discord_channel
             
         self.synced = True
         

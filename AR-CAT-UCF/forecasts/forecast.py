@@ -43,4 +43,4 @@ class ForecastManager():
             
         log.info("Sleeping for 10 minutes.")
             
-        asyncio.sleep(10 * 60)
+        await asyncio.sleep(10 * 60)

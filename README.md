@@ -30,9 +30,15 @@ These two things aare required in order to complete the mapping process for the 
 
 You can download the TIGER/Line census data from [this link](https://www.census.gov/cgi-bin/geo/shapefiles/index.php?year=2025&layergroup=Counties+%28and+equivalent%29). 
 
-You can download the Florida OSM data from [this link](https://download.geofabrik.de/north-america/us.html) and by navigating to the "Florida" **.osm.pbf** file. 
+You can download the Florida GPKG data from [this link](https://download.geofabrik.de/north-america/us.html) and by navigating to the "Florida" **.gpkg.zip** file. 
 
-Once you have done so, go to `AR-CAT-UCF -> geometry` and create **two new folders**. One will be titled **census_data**, which is where the files included in the zip file downloaded from the US Census Bureau will go. Make sure to include all the files in the zip file. Your second folder will be titled **geodata**, and is where the Florida OSM file will be placed. This should be the .osm.pbf file. Do not download any other versions.
+Upon downloading the .gpkg.zip file, you will then extract the zip file into the location of your choice.
+
+Once you have done so, go to `AR-CAT-UCF -> geometry` and create **two new folders**. Title one of these folders **census_data** and the other **geodata**. 
+
+In the `AR-CAT-UCF/geometry/census_data` directory, take the TIGER/Line census data and place it into the folder. This will map out the administrative county geometries. 
+
+Then, in the `AR-CAT-UCF/geometry/geodata` directory, you will take the **florida.gpkg** file you extracted from the zip file, and place it into the directory. **DO NOT RENAME EITHER FILE.** If you rename the file from the default, the bot will throw an error at runtime and wil not function properly. 
 
 > [!WARNING]
 > Do NOT rename any of the files you download. 
@@ -54,3 +60,6 @@ HEADER="AR-CAT-UCF (example@email.com)"
 ```
 
 Once this is setup, the bot is ready to go! You can change any configuration options by navigating to `AR-CAT-UCF -> configuration -> settings.py`. 
+
+## API Information
+AR-CAT-UCF's API is located within the `docs` folder of this project, and details how each part of the bot functions.

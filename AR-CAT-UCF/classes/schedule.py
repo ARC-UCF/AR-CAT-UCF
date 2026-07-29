@@ -11,21 +11,16 @@ class Schedule():
         self.grace_period = grace_period
         
     def should_send(self, lastsent, now: datetime):
-        if lastsent is not None and self.is_same_occurrence(lastsent=lastsent):
+        if not self.matches(now):
             return False
         
-        scheduled_time = now.replace(
-            hour=self.hours if isinstance(self.hours, int) else now.hour,
-            minute=self.minutes if isinstance(self.minutes, int) else now.minute,
-            second=0,
-            microsecond=0
-        )
-        
-        if now < scheduled_time:
+        if lastsent is not None and self.is_same_occurrence(lastsent=lastsent, now=now):
             return False
         
-        if now > scheduled_time + self.grace_period:
-            return False
+        if self.grace_period is not None:
+            window_start = now.replace(second=0, microsecond=0)
+            if now > window_start + self.grace_period:
+                return False
         
         return True
         
@@ -46,7 +41,7 @@ class Schedule():
         if self.hours is not None:
             return (
                 lastsent.year == now.year
-                and lastsent.month and now.month
+                and lastsent.month == now.month
                 and lastsent.day == now.day
                 and lastsent.hour == now.hour
             )
@@ -101,7 +96,7 @@ class Schedule():
             "weekdays": self.weekdays,
             "days": self.days,
             "hours": self.hours,
-            "minutes": self.minutes
+            "minutes": self.minutes,
         }
         
     @classmethod

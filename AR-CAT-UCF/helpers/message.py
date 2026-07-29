@@ -31,7 +31,7 @@ async def post_message(channel, content) -> bool:
             
     log.warn(f"Failure to send message after {max_attempts} successive attempts!")
     
-async def post_embed_with_image(channel, content, buf=None, fileName=None, url=None) -> bool:
+async def post_embed_with_image(channel, content: discord.Embed, buf=None, fileName=None, url=None) -> bool:
     timebuffer = 7
     max_attempts = 4
     
@@ -43,6 +43,7 @@ async def post_embed_with_image(channel, content, buf=None, fileName=None, url=N
                 await channel.send(embed=content, file=file)
             elif url and not buf:
                 content.set_image(url=url)
+                print(content.to_dict())
                 await channel.send(embed=content)
             
             log.info(f"Successfully sent message on {attempt_num} attempt.")
