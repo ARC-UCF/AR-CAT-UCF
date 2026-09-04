@@ -1,6 +1,6 @@
 from classes import Schedule, Message
 from databases import write_messages, fetch_messages
-from helpers import post_message
+from helpers import post_message, channels
 from logger import log
 from datetime import datetime, timedelta
 import asyncio
@@ -94,7 +94,9 @@ class Messenger():
                 
                 embed.set_footer(text=f"{config.version_id} | {msg.footer}")
                 
-                success = await post_message(channel=msg.channel, content=embed)
+                send_channel = channels.get_channel_from_name(msg.channel)
+                
+                success = await post_message(channel=send_channel, content=embed)
                 
                 if success:
                     msg.last_sent = datetime.now()

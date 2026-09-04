@@ -48,6 +48,8 @@ class Alerts():
         
         await self.post_alerts()
         
+        self.check_and_remove_expired()
+        
         write_alerts(self.ActiveAlerts)
         
         await asyncio.sleep(30)
@@ -148,8 +150,8 @@ class Alerts():
                 if alert.response: info_lines.append("Response: " + alert.response)
                 
                 for key, lead in information_to_fetch.items():
-                    if alert.parameters.get(key):
-                        info_lines.append(lead + alert.parameters.get("key"))
+                    if alert.parameters.get(key) and lead:
+                        info_lines.append(lead + alert.parameters.get(key))
                 
                 infoMessage = "\n".join(info_lines)
                 
@@ -203,23 +205,23 @@ class Alerts():
                         
                         if success:
                             log.info(f"Sent embed successfully")
-                    if (county == "orange" or county == "seminole") and alert.geo_base == "Polygon":
-                        ucfAffected = ucf_in_or_near_polygon(alert.geom)
-                        
-                        if ucfAffected:
-                            channel = channels.get_channel_from_name("arc")
-                            
-                            if alert.same in config.ping_alerts and alert.status == "Actual":
-                                ping = config.ping_roles["arc"]
-                                successful = await post_message(channel=channel, content=ping)
-                                
-                                if successful:
-                                    log.info(f"Sent ping successfully")
-                                    
-                            success = await post_embed_with_image(channel=channel, content=embed, buf=buf, fileName=fileName)
-                            
-                            if success:
-                                log.info(f"Sent embed successfully")
+                if (county == "orange" or county == "seminole") and alert.geo_base == "Polygon":
+                    ucfAffected, relation = ucf_in_or_near_polygon(alert.geom)
+                                        
+                    if ucfAffected:
+                        channel = channels.get_channel_from_name("arc")
+                                            
+                        if alert.same in config.ping_alerts and alert.status == "Actual":
+                            ping = config.ping_roles["arc"]
+                            successful = await post_message(channel=channel, content=ping)
+                                                
+                            if successful:
+                                log.info(f"Sent ping successfully")
+                                                    
+                        success = await post_embed_with_image(channel=channel, content=embed, buf=buf, fileName=fileName)
+                                            
+                        if success:
+                            log.info(f"Sent embed successfully")
                 
                 log.info(f"Finished sending alert {alert.id} for {alert.counties}")
                 log.info(f"Moving onto next alert")
@@ -241,6 +243,17 @@ class Alerts():
         
     def first_or_empty(self, lst) -> list: # Helper function for lists.
         return lst[0] if lst else ""
+    
+    def check_and_remove_expired(self):
+        to_remove = {}
+        
+        for key, alert in self.ActiveAlerts.items():
+            if alert.is_expired():
+                to_remove[key] = alert
+                
+        for key in to_remove.keys(): # Need this to clean up alerts, doing it on the dict itself makes it error.
+            del self.ActiveAlerts[key]
+            log.info(f"Removing alert {key} from active alerts.")
     
     async def _filter_alerts(self): # Filter alerts.
         filtered_alerts: list[Alert] = await self._fetch_active_alerts()

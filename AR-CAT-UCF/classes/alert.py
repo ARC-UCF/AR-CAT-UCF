@@ -1,8 +1,9 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from dataclasses import dataclass
 from typing import Optional
 from logger import log
 import re
+from config import config
 
 @dataclass(eq=True)
 class Alert():
@@ -66,12 +67,11 @@ class Alert():
             geom=geom,
         )
         
-    @property
     def is_expired(cls) -> bool:
         if not cls.expires:
             return False
         
-        return datetime.now(timezone.utc) >= datetime.fromisoformat(cls.expires).astimezone(timezone.utc)
+        return datetime.now(timezone.utc) >= datetime.fromisoformat(cls.expires).astimezone(timezone.utc) + timedelta(hours=24)
     
     def ignore_this_alert(cls):
         cls.ignore = True

@@ -10,14 +10,14 @@ This does not include any bug fixes, and focuses on the base changes, so from V3
 
 ### V3.0.0 (Current Version)
 
-- [ ] Initial re-factor
+- [x] Initial re-factor
 - [x] New zone handling improvements
-- [ ] Code re-organization
+- [x] Code re-organization
 - [x] New dataclasses
-- [ ] Alert re-integration
-- [ ] Alert mapping
-- [ ] Forecast information
-- [ ] Base preparedness messages
+- [x] Alert re-integration
+- [x] Alert mapping
+- [x] Forecast information
+- [x] Base preparedness messages
 
 ### V3.1.0
 

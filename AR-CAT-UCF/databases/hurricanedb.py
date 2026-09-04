@@ -4,10 +4,14 @@ from logger import log
 FILE_LOCATION = "databases/hurricane.json"
 
 def fetch_hurricane() -> dict:
+    log.info(f"Reading hurricane json.")
     try:
         with open(FILE_LOCATION) as f:
             data = json.load(f)
             log.info(f"Successfully read hurricanedb file")
+            
+            if data is not None:
+                log.info(data)
             
             if data:
                 return data

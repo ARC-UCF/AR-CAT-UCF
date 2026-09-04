@@ -137,8 +137,17 @@ class HurricaneForecasts():
             
             has, previous = self.fetch_previous()
             
+            print(has, previous)
+            
+            if has:
+                log.info("Has previous discussion")
+            else:
+                log.critical("Does not have previous discussion.")
+            
             if has:
                 result = difflib.SequenceMatcher(None, text, previous).ratio() * 100
+                
+                log.info(f"Hurricane similarity: {result:.2f}%")
                 
                 if result < 92.5:
                     self.previousDiscussion["discussion"] = text
@@ -147,7 +156,7 @@ class HurricaneForecasts():
                     success = await self.post_hurricane(image=image, text=text)
                 else:
                     if period == "Morning":
-                        success = await self.post_continuous_hurricane()
+                        success = await self.post_continuous_hurricane(image=image, text=text)
             else:
                 self.previousDiscussion["discussion"] = text
                 self.previousDiscussion["timestamp"] = datetime.now()
@@ -227,14 +236,15 @@ class HurricaneForecasts():
         else:
             has, past = self.read_prev_discussion()
             
-            if has:
-                self.previousDiscussion["discussion"] = past
+            if has and past:
+                log.info(f"Found previous discussion.")
                 return True, past
             else:
+                log.critical(f"Unable to find previous discussion")
                 return False, None
             
     def read_prev_discussion(self) -> tuple[bool, str | None]:
-        if self.previousDiscussion == None:
+        if not self.previousDiscussion:
             prev = fetch_hurricane()
             
             if prev is None:
@@ -244,6 +254,10 @@ class HurricaneForecasts():
                 
                 discussion = prev["discussion"]
                 timestamp = datetime.fromisoformat(prev["timestamp"])
+                
+                if not self.previousDiscussion and discussion and timestamp:
+                    self.previousDiscussion["discussion"] = discussion
+                    self.previousDiscussion["timestamp"] = timestamp
                 
                 currentTime = datetime.now()
                 
@@ -255,5 +269,5 @@ class HurricaneForecasts():
             return False, None
                 
     def reset_states(self):
-        for period in self.ForecastStates:
+        for period in self.ForecastStates.keys():
             self.ForecastStates[period] = False

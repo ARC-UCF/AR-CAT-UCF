@@ -27,7 +27,7 @@ COUNTIES_WFO = { # Radar WFOs
 }
 
 ucf = Point(-81.2001, 28.6024) # UCF coords for shapely polygon checking
-ucf_point = gpd.GeoSeries([Point(ucf)], crs="EPSG:4326") # Converting UCF to GeoSeries now so we aren't doing this over and over again for just one point.
+ucf_point = gpd.GeoSeries(ucf, crs="EPSG:4326") # Converting UCF to GeoSeries now so we aren't doing this over and over again for just one point.
 ucf_point_m = ucf_point.to_crs(epsg=6439) # Convert to local CRS, this one being Florida East in meters.
 
 meters_to_miles = 1609.34
@@ -37,6 +37,8 @@ base_dir = Path(__file__).resolve().parent
 census_shp = base_dir /  "census_data" / "tl_2025_us_county.shp"
 
 def ucf_in_or_near_polygon(geodat) -> tuple[bool, str]:
+    log.info(f"Checking geometry for near UCF.")
+    
     if not geodat:
         return False, ""
     
@@ -44,7 +46,7 @@ def ucf_in_or_near_polygon(geodat) -> tuple[bool, str]:
     
     gdf_alert = gpd.GeoSeries([polygon], crs="EPSG:4326")
     
-    gdf_m = gdf_alert.to_crs(espg=6439)
+    gdf_m = gdf_alert.to_crs(epsg=6439)
     
     poly_m = gdf_m.iloc[0]
     point_m = ucf_point_m.iloc[0]
@@ -52,6 +54,11 @@ def ucf_in_or_near_polygon(geodat) -> tuple[bool, str]:
     dist_m = point_m.distance(poly_m)
     
     totalDist = dist_m / meters_to_miles
+    
+    log.info(f"Polygon bounds: {polygon.bounds}")
+    log.info(f"UCF: {ucf.x}, {ucf.y}")
+    log.info(f"Distance meters: {dist_m}")
+    log.info(f"Distance miles: {dist_m / 1609.344}")
     
     bufferMiles = config.buffer
     
@@ -110,8 +117,8 @@ def generate_outlook_image(risks: dict[str, RiskArea]):
         
     roads.plot(
         ax=ax,
-        facecolor="#d22c2c",
-        edgecolor=None,
+        facecolor=None,
+        edgecolor="#d22c2c",
         linewidth=1,
         zorder=4,
         transform=ccrs.PlateCarree(),
@@ -126,7 +133,7 @@ def generate_outlook_image(risks: dict[str, RiskArea]):
         
         risk_geom = shape(risk.geometry)
         
-        risk_area = gpd.GeoDataFrame(geometry=[risk_geom], crs="ESPG:4326")
+        risk_area = gpd.GeoDataFrame(geometry=[risk_geom], crs="EPSG:4326")
         
         risk_area.plot(
             ax=ax,
@@ -149,6 +156,7 @@ def generate_outlook_image(risks: dict[str, RiskArea]):
         top=1,
         bottom=0
     )
+    plt.tight_layout()
     plt.savefig(buf, format="png", dpi=200)
     buf.seek(0)
     plt.close(fig)
@@ -293,14 +301,8 @@ def generate_alert_image(coords, coordBase, alertCode):
         loc="left",
         fontsize=24
     )
-    plt.subplots_adjust(
-        left=0,
-        right=1,
-        top=1,
-        bottom=0
-    )
+    plt.tight_layout()
     plt.savefig(buf, format="png", dpi=200)
-    print(ax.get_extent())
     buf.seek(0)
     plt.close(fig)
     return buf

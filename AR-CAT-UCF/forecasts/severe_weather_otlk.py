@@ -3,7 +3,7 @@ from datetime import datetime, time
 from geometry import zones, generate_outlook_image
 from shapely.geometry import shape
 from classes import RiskArea
-from helpers import fetch_url, post_embed_with_image
+from helpers import fetch_url, post_embed_with_image, channels
 import discord
 from config import config
 
@@ -155,14 +155,16 @@ class SevereWeatherOtlk():
                                     log.info(f"{true_name} county has new priority of {newPriority}, upgrade from old priority {currentPriority}")
                                     hits[true_name] = Risk.label
         
+        log.info(risks)
+        
         if hits and risks:
             return hits, risks
         else:
             return None, None
         
     def create_day_information(self, day: str, hits: dict, risks: dict[str, RiskArea]) -> tuple[str, str, str]:
-        valid_str = datetime.fromisoformat(risks[0].valid) # Grab the valid time for the day based on the first risk in the table.
-        expires_str = datetime.fromisoformat[risks[0].expires] # Grab the expired time from that same risk.
+        valid_str = datetime.fromisoformat(next(iter(risks.values())).valid) # Grab the valid time for the day based on the first risk in the table.
+        expires_str = datetime.fromisoformat(next(iter(risks.values())).expires) # Grab the expired time from that same risk.
         
         header = f"$d Severe Weather Outlook From {valid_str} to {expires_str}" # Put the valid time and expire time in the header of the message.
         
@@ -170,11 +172,13 @@ class SevereWeatherOtlk():
         
         header = header.replace("$d", conversions[day]) # Replace the "day_#" format in the header with the "Day #" format
         
-        base_body = f"The following counties are in the following severe weather risks: \n" # The base of the string body, which will list counties impacted.
+        base_body = f"The following counties are in the following severe weather risks: \n\n" # The base of the string body, which will list counties impacted.
         
         if hits is not None: # If we got hits
             for risk_label in risks.keys(): # Begin indexing each risk label by the risk dictionary keys.
-                base_body += f"**In the {risk_names_full[risk_label]} risk:**" # Using the risk label key, fetch the full name of the risk, and then attach it as a header for a section.
+                if risk_label == "TSTM": continue
+                
+                base_body += f"**In the {risk_names_full[risk_label]} risk:**\n" # Using the risk label key, fetch the full name of the risk, and then attach it as a header for a section.
                 # This effectively lets us display which counties are in each risk.
                 
                 if highest_risk == "None": highest_risk = risk_label # If no previous highest risk has been set, set it to the current risk.
@@ -182,10 +186,9 @@ class SevereWeatherOtlk():
                 if RISK_ORDER.index(highest_risk) < RISK_ORDER.index(risk_label): # Check the risk. If the highest risk is a lower priority then the current risk, set the highest risk to the current risk.
                     log.info(f"{risk_label} is replacing {highest_risk} as the highest risk for this day.")
                     highest_risk = risk_label
-                
                 for county, risk in hits.items(): # For each county and their risk, compare.
                     if risk_label == risk: # If the county's risk assignment is equal to the current risk we're indexing...
-                        base_body += f"{county} County\n" # ...add it to the string of counties.
+                        base_body += f"{county.title()} County\n" # ...add it to the string of counties.
                         
                 base_body += "\n" # Padding at the bottom for any extra strings (which we will add)
                 
@@ -194,7 +197,7 @@ class SevereWeatherOtlk():
     def run_check(self, day) -> tuple[dict, dict[str, RiskArea], str, str, str]:
         hits, risks = self.check_outlook_day(day=day)
         
-        if not hits or risks: return None, None, None, None, None
+        if not hits or not risks: log.critical(f"Failed to return hits or risks."); return None, None, None, None, None
         
         highest_risk, msg, header = self.create_day_information(day=day, hits=hits, risks=risks)
         
@@ -258,11 +261,14 @@ class SevereWeatherOtlk():
             return False
         
     async def push_posts(self, to_post: dict) -> bool:
+        log.info(to_post)
         for day, data in to_post.items():
             risks = data["risks"]
             highest_risk = data.get("highest_risk", "")
             message = data.get("message", "")
             header = data.get("header", "")
+            
+            if risks is None: continue
             
             buf = generate_outlook_image(risks=risks)
             
@@ -276,7 +282,9 @@ class SevereWeatherOtlk():
             
             embed.set_image(url="attachment://outlook_map.png")
             
-            success = await post_embed_with_image(channel="forecast", embed=embed, buf=buf, fileName="outlook_map.png")
+            send_channel = channels.get_channel_from_name("forecast")
+            
+            success = await post_embed_with_image(channel=send_channel, content=embed, buf=buf, fileName="outlook_map.png")
             
             if success:
                 return True

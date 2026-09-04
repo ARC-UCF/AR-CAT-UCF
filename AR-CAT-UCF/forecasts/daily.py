@@ -69,11 +69,11 @@ class DailyForecast():
         
     async def post_forecasts(self, days: list[Day], time_of_day):
         embed = discord.Embed(
-            title=f"{time_of_day} Forecast for {datetime.now().weekday()}",
+            title=f"{time_of_day} Forecast for {datetime.now().strftime("%A")}",
             color=0x53eb31
         )
         
-        embed.set_footer(config.version_id)
+        embed.set_footer(text=config.version_id)
         
         forecastChannel = channels.get_channel_from_name("forecast")
         
@@ -103,7 +103,7 @@ class DailyForecast():
         return False, None
     
     def reset(self):
-        for period in self.ForecastStates.items():
+        for period in self.ForecastStates.keys():
             self.ForecastStates[period] = False
         
     async def check(self):
