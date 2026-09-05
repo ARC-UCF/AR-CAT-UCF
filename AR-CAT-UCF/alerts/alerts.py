@@ -169,7 +169,7 @@ class Alerts():
                 embed.add_field(name="Alert Information", value=infoMessage, inline=False)
                 embed.set_footer(text=config.version_id)
                 
-                buf = generate_alert_image(alert.geom, alert.geo_base, alert.same)
+                buf = generate_alert_image(alert.geom, alert.geo_base, alert.same, alert.color)
                 
                 fileName = "alert_map.png"
                 
@@ -424,12 +424,12 @@ class Alerts():
             same_listing = eventCode.get("SAME", {})
             nws_listing = eventCode.get("NationalWeatherService", {}) # The SAME code sometimes isn't used, but the NWS listing is, so we get this one so we can later replace the SAME code if needed. In other cases, it won't be needed. But, in some cases, like Flood Advisories, no code is provided, so we replace the SAME code of none, with the NWS listing, which is "FAY"
             
-            code
+            code = None
             
-            if same_listing == "NWS":
-                code = nws_listing
+            if same_listing[0] == "NWS":
+                code = nws_listing[0]
             else:
-                code = same_listing
+                code = same_listing[0]
             
             color = config.alert_colors.get(code, '#6e6e6e')
             
