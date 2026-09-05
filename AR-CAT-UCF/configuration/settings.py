@@ -1,7 +1,7 @@
 guild_id = 881444885402628177
 bufferMiles = 3
 storageTime = 24 # In hours
-version = "v3.0.0"
+version = "v3.0.1"
 author = "AR-CAT-UCF"
 
 countiesToMonitor= {
