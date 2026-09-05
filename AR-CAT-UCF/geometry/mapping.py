@@ -162,7 +162,7 @@ def generate_outlook_image(risks: dict[str, RiskArea]):
     plt.close(fig)
     return buf
 
-def generate_alert_image(coords, coordBase, alertCode):
+def generate_alert_image(coords, coordBase, alertCode, color):
     geodat_gpkg = base_dir /  "geodata" / "florida_export.gpkg"
     
     places = gpd.read_file(geodat_gpkg, layer="places")
@@ -194,7 +194,7 @@ def generate_alert_image(coords, coordBase, alertCode):
             
         alert = gpd.GeoDataFrame(geometry=polygons, crs="EPSG:4326")
     
-    polygonColor = config.alert_colors.get(alertCode, "None")
+    polygonColor = color
     
     minx, miny, maxx, maxy = alert.total_bounds
     
