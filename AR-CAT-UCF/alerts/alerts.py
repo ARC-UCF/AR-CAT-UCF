@@ -258,7 +258,7 @@ class Alerts():
     async def _filter_alerts(self): # Filter alerts.
         filtered_alerts: list[Alert] = await self._fetch_active_alerts()
         
-        if not filtered_alerts: log.warn(f"No active alerts were found in this cycle. This could be an error: considering checking logs. Or, no alerts could be active at the current moment.")
+        if not filtered_alerts: log.warn(f"No active alerts were found in this cycle. This could be an error: considering checking logs. Or, no alerts could be active at the current moment."); return
         
         for alert in filtered_alerts:
             if alert is None: continue

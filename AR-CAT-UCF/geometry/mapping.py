@@ -157,7 +157,7 @@ def generate_outlook_image(risks: dict[str, RiskArea]):
         bottom=0
     )
     plt.tight_layout()
-    plt.savefig(buf, format="png", dpi=200)
+    plt.savefig(buf, format="png", dpi=200, bbox_inches='tight')
     buf.seek(0)
     plt.close(fig)
     return buf
@@ -302,7 +302,7 @@ def generate_alert_image(coords, coordBase, alertCode):
         fontsize=24
     )
     plt.tight_layout()
-    plt.savefig(buf, format="png", dpi=200)
+    plt.savefig(buf, format="png", dpi=200, bbox_inches='tight')
     buf.seek(0)
     plt.close(fig)
     return buf
