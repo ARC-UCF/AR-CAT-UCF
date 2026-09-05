@@ -21,6 +21,7 @@ class Alert():
     messageType: str
     geo_base: str
     counties: list
+    color: str
     parameters: dict | list
     ignore: bool = False
     posted: bool = False
@@ -37,7 +38,7 @@ class Alert():
     geom: Optional[dict | list] = None
     
     @classmethod
-    def create_alert(cls, id, props, nws_headline, same, nws, geom, geom_base, counties, parameters):
+    def create_alert(cls, id, props, color, nws_headline, same, nws, geom, geom_base, counties, parameters):
         
         return cls(
             id=id,
@@ -52,6 +53,7 @@ class Alert():
             response=props.get("response"),
             desc=props.get("description"),
             messageType=props.get("messageType"),
+            color=color,
             geo_base=geom_base,
             counties=counties,
             parameters=parameters,
@@ -75,6 +77,9 @@ class Alert():
     
     def ignore_this_alert(cls):
         cls.ignore = True
+        
+    def update_alert_color(cls, newColor):
+        cls.color = newColor
         
     @classmethod
     def from_dict(cls, data):

@@ -268,9 +268,9 @@ class Alerts():
                 
                 if replaces and method == "references":
                     alert.ignore_this_alert()
-                    alert.same = a.same
+                    alert.update_alert_color(a.color)
                 elif replaces and method == "replaces":
-                    alert.same = a.same
+                    alert.update_alert_color(a.color)
                     
                 if self._check_for_similar(alert, a):
                     alert.ignore_this_alert()
@@ -424,6 +424,15 @@ class Alerts():
             same_listing = eventCode.get("SAME", {})
             nws_listing = eventCode.get("NationalWeatherService", {}) # The SAME code sometimes isn't used, but the NWS listing is, so we get this one so we can later replace the SAME code if needed. In other cases, it won't be needed. But, in some cases, like Flood Advisories, no code is provided, so we replace the SAME code of none, with the NWS listing, which is "FAY"
             
+            code
+            
+            if same_listing == "NWS":
+                code = nws_listing
+            else:
+                code = same_listing
+            
+            color = config.alert_colors.get(code, '#6e6e6e')
+            
             impacted, areas = zones.check_area_impacted(aZones)
             
             if impacted: # We only add the alert to our dict if it is in an impacted area.
@@ -447,7 +456,7 @@ class Alerts():
                     geom = areas
                     coordBase = "County"
                         
-                compiled_alerts.append(Alert.create_alert(id=alert["id"], props=props, nws_headline=nws_headline, same=same_listing[0], nws=nws_listing[0], geom=geom, geom_base=coordBase, counties=counties, parameters=param_values))
+                compiled_alerts.append(Alert.create_alert(id=alert["id"], props=props, color=color, nws_headline=nws_headline, same=same_listing[0], nws=nws_listing[0], geom=geom, geom_base=coordBase, counties=counties, parameters=param_values))
                 
         return compiled_alerts
     
