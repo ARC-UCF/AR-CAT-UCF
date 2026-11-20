@@ -27,7 +27,7 @@ class Messenger():
             Message.new(
                 id="hurr_day_before",
                 header=f"The {datetime.now().year} Atlantic Hurricane Season Starts Tomorrow",
-                message=f"The Atlantic Hurricane Season starts tomorrow, June 1st, and ends November 31st.\n\nAR-CAT-UCF will begin posting Atlantic Tropical Cyclone Genesis Outlooks tomorrow.\n\nAs a reminder, consider taking small steps to prepare for hurricane season! Consider stocking up on or checking your stock of batteries, consider purchasing a radio capable of receiving NOAA weather alerts, ensuring you have non-perishable food, and have multiple ways to receive weather alerts from local government agencies, which includes via NOAA weather radio, cellular device, weather app, sirens, news station, or by word of mouth.\n\nFEMA recommends stocking up on three days worth of supplies per person in the case of any natural disaster.\n\nCheck your Flood Zone by checking [FEMA's Flood Zone Map](https://msc.fema.gov/portal/search).\n\n**Other links which might be helpful:**\n[UCF Hurricane Information](https://www.ucf.edu/hurricane/)\n[National Hurricane Center: Hurricane Preparedness](https://www.noaa.gov/hurricane-prep)\n[CECS Wiki Hurricane Links and Info](https://newton.i2lab.ucf.edu/wiki/Hurricanes)\n\nRemember: **don't be scared, be prepared!**",
+                message=f"The Atlantic Hurricane Season starts tomorrow, June 1st, and ends November 31st.\n\nAR-CAT-UCF will begin posting Atlantic Tropical Cyclone Genesis Outlooks tomorrow.\n\nAs a reminder, consider taking small steps to prepare for hurricane season! Consider stocking up on or checking your stock of batteries, consider purchasing a radio capable of receiving NOAA weather alerts, ensure you have non-perishable food, and have multiple ways to receive weather alerts from local government agencies, which includes via NOAA weather radio, cellular device, weather app, sirens, news station, or by word of mouth.\n\nFEMA recommends stocking up on three days worth of supplies per person in the case of any natural disaster.\n\nCheck your Flood Zone by checking [FEMA's Flood Zone Map](https://msc.fema.gov/portal/search).\n\n**Other links which might be helpful:**\n[UCF Hurricane Information](https://www.ucf.edu/hurricane/)\n[National Hurricane Center: Hurricane Preparedness](https://www.noaa.gov/hurricane-prep)\n[CECS Wiki Hurricane Links and Info](https://newton.i2lab.ucf.edu/wiki/Hurricanes)\n\nRemember: **don't be scared, be prepared!**",
                 footer="This message is sent automatically on the 31st of May",
                 channel="hurricane",
                 schedule=Schedule(
@@ -48,6 +48,34 @@ class Messenger():
                     months=7,
                     days=31,
                     hours=12,
+                    minutes=0,
+                    grace_period=timedelta(minutes=30)
+                )
+            ),
+            Message.new(
+                id="hurr_month_end",
+                header=f"The {datetime.now().year} Hurricane Season Has Ended",
+                message=f"The {datetime.now().year} hurricane season has ended. Hurricane seasons ends today, December 1st. Hurricanes or tropical storms may still occur in the off-season, but the likelihood is very limited, given poor conditions for their development. The {datetime.now().year + 1} hurricane season will begin June 1st.",
+                footer="This message is sent automatically on the 1st of December",
+                channel="hurricane",
+                schedule=Schedule(
+                    months=12,
+                    days=1,
+                    hours=12,
+                    minutes=0,
+                    grace_period=timedelta(minutes=30)
+                )
+            ),
+            Message.new(
+                id="florida_wet_season_begin",
+                header=f"Florida's Rainy Season Begins Soon",
+                message=f"Florida's historical rainy season begins soon. Florida's rainy season historically begins around May, but will peak come August to October. Thunderstorms will gradually become a daily occurrence during this period.\n\nBring an umbrella or other rain gear with you! Plan your days with thunderstorms and rain showers in mind, and be prepared to move indoors should thunder roar. If you can hear thunder, you are close enough to be struck by lightning!\n\nThe morning to late evening hours will provide the best times to be outdoors - minimal heat plus lack of thunderstorm activity will allow ample time to setup radio stations and take them down before the arrival of lightning and/or rain. Some storms can become strong to severe on any given day during this period due to the sea breeze.",
+                footer="This message is sent automatically on the 10th of May",
+                channel="forecast",
+                schedule=Schedule(
+                    months=5,
+                    days=10,
+                    hours=11,
                     minutes=0,
                     grace_period=timedelta(minutes=30)
                 )
