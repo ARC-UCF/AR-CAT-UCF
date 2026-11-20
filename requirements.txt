@@ -1,0 +1,13 @@
+scipy
+numpy
+discord.py
+requests
+boto3
+arm-pyart
+matplotlib
+shapely
+geopandas
+python-dotenv
+colorama
+pprint
+logging

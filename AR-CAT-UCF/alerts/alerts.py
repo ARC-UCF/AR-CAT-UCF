@@ -263,19 +263,22 @@ class Alerts():
         for alert in filtered_alerts:
             if alert is None: continue
             
-            for _, a in self.ActiveAlerts.items():
-                replaces, method = self._check_for_ref(alert, a)
-                
-                if replaces and method == "references":
-                    alert.ignore_this_alert()
-                    alert.update_alert_color(a.color)
-                elif replaces and method == "replaces":
-                    alert.update_alert_color(a.color)
-                    
-                if self._check_for_similar(alert, a):
-                    alert.ignore_this_alert()
-            
             if alert.id not in self.ActiveAlerts:
+                replaces, method, key = self._check_for_ref(alert)
+                
+                if replaces:
+                    a: Alert = self.ActiveAlerts[key]
+                                    
+                    if replaces and method == "references":
+                        alert.ignore_this_alert()
+                        alert.update_alert_color(a.color)
+                    elif replaces and method == "replaces":
+                        alert.update_alert_color(a.color)
+                    
+                for a in self.ActiveAlerts.values():
+                    if self._check_for_similar(alert, a):
+                        alert.ignore_this_alert()
+                    
                 log.info(f"New alert appended: {alert.title} ({alert.id})")
                 self.ActiveAlerts[alert.id] = alert
             else:
@@ -299,31 +302,44 @@ class Alerts():
         return False
         
                 
-    def _check_for_ref(self, alert1: Alert, alert2: Alert) -> tuple[bool, str]:
+    def _check_for_ref(self, alert1: Alert) -> tuple[bool, str, str]:
+        if alert1.same in IGNORE_LIST: return False, "no", None
+        
         alert1_refs = alert1.references
-        alert2_refs = alert2.references
         
-        if alert1_refs or alert2_refs is None:
-            log.info(f"This alert has no references.")
-            return False, "no"
-        
-        if alert1_refs:
-            for r in alert1_refs:
-                if r["@id"] == alert2.id:
-                    return True, "references"
-        
-        if alert2_refs:
-            for r in alert2_refs:
-                if r["@id"] == alert1.id:
-                    return True, "references"
-                
-        alert2_replace = alert2.replacedBy
-        
-        if alert2_replace:
-            if alert2_replace == alert1.id :
-                return True, "replaces"
+        for key, alert in self.ActiveAlerts.items():
+            refs = alert.references
+            replacedBy = alert.replacedBy
             
-        return False, "no"
+            if replacedBy:
+                if replacedBy == alert1.id:
+                    return True, "replaces", key
+                
+            if refs:
+                for r in refs:
+                    if r["@id"] == alert1.id:
+                        return True, "references", key
+                    
+        if alert1_refs:
+            for ref in alert1_refs:
+                refId = ref["@id"]
+                
+                if refId and refId in self.ActiveAlerts:
+                    alert2: Alert = self.ActiveAlerts[refId]
+                    
+                    if alert2.replacedBy is not None:
+                        if alert2.replacedBy == alert1.id:
+                            return True, "replaces", refId
+                        
+                    return True, "references", refId
+                
+                if refId and refId in self.ActiveAlerts:
+                    alert2: Alert = self.ActiveAlerts[refId]
+                    
+                    if alert2.replacedBy and alert2.replacedBy == alert1.id:
+                        return True, "replaces", alert2.id
+                    
+        return False, "no", None
         
     async def _refresh_current_alerts(self):
         if not self.ActiveAlerts: log.warn(f"No alerts were active to filter through or update."); return

@@ -12,8 +12,6 @@ countiesToMonitor= {
     "Osceola, FL",
     "Lake, FL",
     "Polk, FL",
-    "Flagler, FL",
-    "St. Johns, FL",
 }
 
 pings = {

@@ -1,6 +1,5 @@
 *.env
 *.html
-*.txt
 *.json
 *.pyc
 *.gpkg

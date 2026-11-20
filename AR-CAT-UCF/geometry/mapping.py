@@ -23,7 +23,7 @@ RADAR_EXTENTS = { # Radar points
 COUNTIES_WFO = { # Radar WFOs
     "KMLB": ["brevard", "orange", "seminole", "volusia", "osceola", "lake"],
     "KJAX": ["st. johns", "flagler"],
-    "KBTW": ["polk"],
+    "KTBW": ["polk"],
 }
 
 ucf = Point(-81.2001, 28.6024) # UCF coords for shapely polygon checking
