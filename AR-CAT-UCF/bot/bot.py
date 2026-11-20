@@ -5,6 +5,7 @@ from messages import Messenger
 from forecasts import ForecastManager
 from helpers import AsyncLinks, channels
 from logger import log
+from config import config
 import asyncio
 import traceback
 
@@ -40,6 +41,16 @@ class CAT(commands.Bot):
             self.tasks_started = True
             
             channels.sync_channels(self)
+            
+        log.info(f"Client is ready!")
+        log.info(f"Logged in as client {self.user}")
+                
+        guild = discord.Object(id=config.guild_id)
+                
+        self.tree.copy_global_to(guild=guild)
+        await self.tree.sync(guild=guild)
+                    
+        await self.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="Watching the weather"), status=discord.Status.dnd)
         
     async def check_alerts(self):
         while True:
